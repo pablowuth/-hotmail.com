@@ -23,6 +23,8 @@ Este blueprint es la hoja de ruta arquitectónica para construir ese sistema.
 | Documento | Rol |
 |-----------|-----|
 | `docs/FOUNDATIONAL_PRINCIPLES.md` | **Constitución del proyecto** — propósito, filosofía, principios, límites. Prevalece sobre todo desarrollo. |
+| `docs/business-brain-diseno.md` | **Diseño en profundidad del Business Brain** — ciclo de decisión, consulta distribuida, conflictos, explicabilidad |
+| `docs/mercadeo-ia-master-blueprint.md` | Arquitectura estratégica general |
 | `docs/supply-intelligence-engine-diseno.md` | Diseño profundo de Supply Intelligence y Freight Intelligence |
 
 ---
@@ -575,38 +577,24 @@ El tiempo aquí **ubica patrones** en la línea histórica; el razonamiento prim
 
 ### V.8 Business Brain
 
-**Misión:** Sintetizador estratégico. **No decide.** La decisión final siempre pertenece al empresario.
+**Documento completo:** `docs/business-brain-diseno.md`
 
-Business Brain **no es un oráculo ni un autopiloto**. Es la capa que hace legible la complejidad de múltiples cerebros.
+El Business Brain es el **componente más importante** de Mercadeo IA y el **único que dialoga con el empresario**. Todos los demás cerebros generan evidencia; el Business Brain la integra.
+
+**No es:** chatbot, motor de reglas, LLM que responde preguntas.  
+**Es:** sistema de síntesis estratégica que detecta conflictos, consulta Legacy, construye hipótesis y entrega propuestas con los 8 elementos obligatorios de explicabilidad.
 
 | Función | Qué hace | Qué NO hace |
 |---------|----------|-------------|
-| **Sintetizar** | Unifica señales de todos los cerebros en narrativa coherente | No elige por el empresario |
-| **Detectar conflictos** | Muestra cuando cerebros discrepan explícitamente | No oculta contradicciones |
-| **Relacionar información** | Conecta patrones entre dominios vía Knowledge Graph | No opera en silos |
-| **Explicar** | Produce narrativa comprensible con evidencia | No entrega conclusiones opacas |
-| **Justificar** | Cita datos, reglas, experiencias e hipótesis | No dice "haga esto" sin sustento |
-| **Proponer hipótesis** | Sugiere líneas de acción como posibilidades, no órdenes | No ejecuta ni impone |
+| **Sintetizar** | Unifica evidencia de todos los cerebros | No elige por el empresario |
+| **Detectar conflictos** | Protocolo formal C1–C6; nunca oculta | No promedia contradicciones |
+| **Relacionar** | Conecta patrones vía Knowledge Graph | No opera en silos |
+| **Explicar y justificar** | 8 elementos obligatorios vía Explainability Engine | No entrega sin sustento |
+| **Proponer hipótesis** | 2–4 opciones con trade-offs | No ejecuta ni impone |
 
-**Ejemplo de conflicto presentado (no resuelto unilateralmente):**
-- Supply señala patrón: flete subiendo → costo de reposición aumentará
-- Product señala patrón: categoría en saturación → riesgo de sobrestock
-- Legacy cita experiencia: adelantar compra en saturación → sobrestock 8 meses (confianza 0.82)
+**Ciclo de decisión (10 fases):** Comprensión → Contexto → Consulta distribuida → Integración → Conflicto → Legacy → Hipótesis → Explicabilidad → Entrega → Registro.
 
-**Business Brain presenta:**
-1. Los tres patrones con sus evidencias
-2. El conflicto explícito
-3. Hipótesis posibles (adelantar parcialmente / esperar / buscar variante)
-4. Confianza y riesgos de cada hipótesis
-5. **El empresario decide**
-
-**No es un LLM suelto.** Es síntesis con reglas, scores, citas obligatorias y gate de Explainability Engine.
-
-**Análisis crítico:**
-- ✅ Necesario para evitar 9 alertas contradictorias sin contexto
-- ⚠️ Riesgo: degenerar en chatbot que "recomienda" sin evidencia
-- ⚠️ Riesgo: usuario delega decisión implícitamente si la síntesis parece conclusiva
-- Mitigación: lenguaje de hipótesis, nunca imperativo; decisión explícitamente humana
+**Principio inviolable:** la decisión final siempre pertenece al empresario.
 
 ---
 

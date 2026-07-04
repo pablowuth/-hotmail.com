@@ -7,5 +7,6 @@ Sistema Operativo de Inteligencia Estratégica para Empresas.
 | Documento | Descripción |
 |-----------|-------------|
 | [FOUNDATIONAL_PRINCIPLES.md](docs/FOUNDATIONAL_PRINCIPLES.md) | Constitución del proyecto — propósito, principios, límites |
+| [business-brain-diseno.md](docs/business-brain-diseno.md) | Business Brain — diseño en profundidad |
 | [mercadeo-ia-master-blueprint.md](docs/mercadeo-ia-master-blueprint.md) | Master Blueprint v1.1 — arquitectura estratégica 10 años |
 | [supply-intelligence-engine-diseno.md](docs/supply-intelligence-engine-diseno.md) | Diseño de Supply Intelligence y Freight Intelligence |
