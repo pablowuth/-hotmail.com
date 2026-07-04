@@ -1,0 +1,80 @@
+[
+  {
+    "fecha": "08/04/2016",
+    "rut": "216595910016",
+    "nombre": "BRIC ELEMENTS IMPORTACION & EXPORTACION S R L",
+    "tipo": "Importación",
+    "pais": "Argentina",
+    "producto": "Plásticos y manufacturas (3920621900)",
+    "usd": "US$680",
+    "kg": "364",
+    "aduana": "Bella Union",
+    "hs": "3920621900",
+    "category": "cielorraso_pvc"
+  },
+  {
+    "fecha": "08/04/2016",
+    "rut": "216595910016",
+    "nombre": "BRIC ELEMENTS IMPORTACION & EXPORTACION S R L",
+    "tipo": "Importación",
+    "pais": "Argentina",
+    "producto": "Plásticos y manufacturas (3920629100)",
+    "usd": "US$236",
+    "kg": "127",
+    "aduana": "Bella Union",
+    "hs": "3920629100",
+    "category": "cielorraso_pvc"
+  },
+  {
+    "fecha": "25/01/2016",
+    "rut": "216595910016",
+    "nombre": "BRIC ELEMENTS IMPORTACION & EXPORTACION S R L",
+    "tipo": "Importación",
+    "pais": "Argentina",
+    "producto": "Plásticos y manufacturas (3920621900)",
+    "usd": "US$691",
+    "kg": "482",
+    "aduana": "Artigas",
+    "hs": "3920621900",
+    "category": "cielorraso_pvc"
+  },
+  {
+    "fecha": "25/01/2016",
+    "rut": "216595910016",
+    "nombre": "BRIC ELEMENTS IMPORTACION & EXPORTACION S R L",
+    "tipo": "Importación",
+    "pais": "Argentina",
+    "producto": "Plásticos y manufacturas (3920629100)",
+    "usd": "US$272",
+    "kg": "189",
+    "aduana": "Artigas",
+    "hs": "3920629100",
+    "category": "cielorraso_pvc"
+  },
+  {
+    "fecha": "23/12/2025",
+    "rut": "214737710015",
+    "nombre": "PUERTA DEL SUR S A",
+    "tipo": "Importación",
+    "pais": "China",
+    "producto": "Plásticos y manufacturas (3926909099)",
+    "usd": "US$7.4k",
+    "kg": "190",
+    "aduana": "Colonia",
+    "hs": "3926909099",
+    "category": "cielorraso_pvc"
+  },
+  {
+    "fecha": "12/11/2025",
+    "rut": "214737710015",
+    "nombre": "PUERTA DEL SUR S A",
+    "tipo": "Importación",
+    "pais": "Costa Rica",
+    "producto": "Plásticos y manufacturas (3925909000)",
+    "usd": "US$6.3k",
+    "kg": "220",
+    "aduana": "Montevideo",
+    "hs": "3925909000",
+    "category": "cielorraso_pvc"
+  }
+]

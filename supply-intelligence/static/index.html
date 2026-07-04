@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Importaciones Construcción — Uruguay</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="/assets/styles.css" />
+</head>
+<body>
+  <header class="header">
+    <div>
+      <p class="eyebrow">Mercadeo IA · Supply Intelligence · Uruguay</p>
+      <h1>¿Quién importa qué en Uruguay?</h1>
+      <p class="subtitle">Datos reales de operaciones aduaneras — sin inventar campos que la fuente no publica</p>
+    </div>
+    <div class="filters">
+      <label for="productFilter">Producto</label>
+      <select id="productFilter">
+        <option value="">Todos</option>
+      </select>
+      <button id="refreshBtn" class="btn">Actualizar</button>
+      <button id="ingestBtn" class="btn btn-secondary">Sincronizar DNA</button>
+    </div>
+  </header>
+
+  <section class="notice" id="sourceNotice">
+    <p><strong>Fuente:</strong> <span id="sourceLabel">datospublicos.uy → Dirección Nacional de Aduanas</span></p>
+    <p class="muted">Campos vacíos = no disponibles en la fuente pública gratuita (proveedor, FOB, flete, aranceles).</p>
+  </section>
+
+  <main>
+    <section class="kpis" id="kpis"></section>
+
+    <section class="card coverage" id="coverage"></section>
+
+    <section class="grid-2">
+      <article class="card">
+        <h2>Valor importado por mes (USD declarado)</h2>
+        <canvas id="valueChart"></canvas>
+      </article>
+      <article class="card">
+        <h2>USD/kg (proxy de precio, cuando hay peso)</h2>
+        <canvas id="priceChart"></canvas>
+      </article>
+    </section>
+
+    <section class="grid-2">
+      <article class="card">
+        <h2>Volumen (kg declarado)</h2>
+        <canvas id="volumeChart"></canvas>
+      </article>
+      <article class="card">
+        <h2>Alertas de variación</h2>
+        <div id="alertsList" class="alerts-list"></div>
+      </article>
+    </section>
+
+    <section class="card">
+      <h2>Importadores</h2>
+      <div class="table-wrap">
+        <table id="importersTable">
+          <thead>
+            <tr>
+              <th>Importador</th>
+              <th>RUT</th>
+              <th>Operaciones</th>
+              <th>Valor USD</th>
+              <th>Kg total</th>
+              <th>USD/kg</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Operaciones de importación</h2>
+      <div class="table-wrap">
+        <table id="operationsTable">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Importador</th>
+              <th>RUT</th>
+              <th>Producto</th>
+              <th>NCM</th>
+              <th>Origen</th>
+              <th>Kg</th>
+              <th>Valor USD</th>
+              <th>USD/kg</th>
+              <th>Proveedor</th>
+              <th>FOB</th>
+              <th>Flete</th>
+              <th>Arancel</th>
+              <th>Desaduanizado/u</th>
+              <th>Aduana</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>datospublicos.uy · DNA Uruguay · Solo importaciones tipo I · Productos de construcción filtrados por NCM/palabras clave</p>
+  </footer>
+
+  <script src="/assets/app.js"></script>
+</body>
+</html>
