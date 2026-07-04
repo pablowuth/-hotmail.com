@@ -1,6 +1,6 @@
 # MERCADEO IA — MASTER BLUEPRINT
 
-**Versión:** 1.0  
+**Versión:** 1.1  
 **Clasificación:** Arquitectura estratégica — documento rector  
 **Horizonte:** 10 años  
 **Estado:** Diseño conceptual. Sin implementación.
@@ -16,10 +16,14 @@ Este documento redefine Mercadeo IA.
 
 Su objetivo no es administrar clientes. Es ayudar a los empresarios a tomar mejores decisiones durante décadas — preservando lo que los datos solos no pueden capturar: la experiencia humana acumulada, los errores, las crisis, las intuiciones y el contexto histórico que da sentido a los números.
 
-Este blueprint es la hoja de ruta arquitectónica para construir ese sistema. Debe leerse como constitución, no como manual de features.
+Este blueprint es la hoja de ruta arquitectónica para construir ese sistema.
 
-**Documentos relacionados (subsistemas detallados):**
-- `docs/supply-intelligence-engine-diseno.md` — diseño profundo de Supply Intelligence y Freight Intelligence
+**Documentos relacionados:**
+
+| Documento | Rol |
+|-----------|-----|
+| `docs/FOUNDATIONAL_PRINCIPLES.md` | **Constitución del proyecto** — propósito, filosofía, principios, límites. Prevalece sobre todo desarrollo. |
+| `docs/supply-intelligence-engine-diseno.md` | Diseño profundo de Supply Intelligence y Freight Intelligence |
 
 ---
 
@@ -40,7 +44,10 @@ Mercadeo IA debe convertirse en la plataforma que:
 | **Aprende de la experiencia humana** | Los datos dicen qué; las personas dicen por qué |
 | **Reduce incertidumbre** | No elimina el riesgo; lo hace visible y manejable |
 
-**Límite sagrado:** Mercadeo IA nunca intenta reemplazar al empresario. Potencia su capacidad. La decisión final es humana. El sistema informa, no manda.
+**Límite sagrado:** Mercadeo IA nunca intenta reemplazar al empresario. Existe para ampliar su capacidad de observar, comprender, recordar, relacionar, aprender y decidir. La decisión final es siempre humana.
+
+> *Cada nueva funcionalidad debe responder: ¿Ayuda realmente al empresario a tomar una mejor decisión que la que tomaría sin el sistema? Si la respuesta es no, no debe implementarse.*  
+> — Ver `FOUNDATIONAL_PRINCIPLES.md`
 
 ### I.2 Lo que Mercadeo IA NO es
 
@@ -79,7 +86,45 @@ Debe convertirse en **el activo intelectual más importante de una empresa**: el
 
 ---
 
-## II. CONSTITUCIÓN — LOS CUATRO PRINCIPIOS
+## II. MODELO DE RAZONAMIENTO
+
+### II.1 El tiempo no es el eje principal
+
+Mercadeo IA **no razona primero** en pasado, presente o futuro.
+
+Razona primero en:
+
+| Eje primario | Qué aporta |
+|--------------|------------|
+| **Patrones** | Regularidades que se repiten en contextos distintos |
+| **Relaciones** | Cómo se conectan entidades entre sí |
+| **Causas** | Por qué algo ocurre, no solo que ocurre |
+| **Consecuencias** | Qué desencadena qué, en cadena |
+| **Señales** | Indicadores tempranos de cambio |
+| **Contexto** | Circunstancias que hacen que un patrón aplique o no |
+
+El **tiempo** se utiliza solamente para **ubicar un patrón dentro de una línea histórica** — no como categoría primaria de pensamiento.
+
+### II.2 Implicaciones arquitectónicas
+
+| Enfoque incorrecto | Enfoque correcto |
+|--------------------|------------------|
+| "¿Qué pasó el mes pasado?" | "¿Qué patrón se repite y dónde aparece en el histórico?" |
+| Dashboard temporal primero | Grafo de relaciones primero; tiempo como dimensión de ubicación |
+| Predicción como extrapolación lineal | Predicción como proyección de patrones con contexto |
+| Experiencia atada a una fecha | Experiencia reutilizable en contextos distintos |
+
+### II.3 Conocimiento reutilizable
+
+El conocimiento capturado debe poder aplicarse **en distintos contextos**. Una experiencia de sobrestock en 2019 debe poder iluminar una decisión de stock en 2029 si el patrón — no la fecha — es relevante.
+
+Legacy Intelligence, heurísticas y DecisionRecord se diseñan para **reutilización contextual**, no para archivo cronológico.
+
+---
+
+## III. CONSTITUCIÓN — PRINCIPIOS FUNDAMENTALES
+
+Los principios completos, límites y criterios de aceptación de funcionalidades están en **`FOUNDATIONAL_PRINCIPLES.md`**. Aquí se resumen las implicaciones arquitectónicas.
 
 ### Principio 1 — La experiencia es un activo estratégico
 
@@ -114,27 +159,39 @@ Cada interacción — consulta, decisión registrada, resultado reportado, corre
 
 ### Principio 4 — Explicabilidad obligatoria
 
-Toda recomendación debe incluir:
+Toda propuesta al empresario debe justificar:
 
-```
-RECOMENDACIÓN: [qué hacer]
-POR QUÉ: [razonamiento en lenguaje claro]
-EVIDENCIA: [datos, fuentes, períodos]
-CONFIANZA: [nivel + factores que lo reducen o aumentan]
-RIESGOS: [qué puede salir mal]
-EXPERIENCIA HISTÓRICA: [casos similares del Legacy]
-ALTERNATIVAS: [qué más se consideró y por qué se descartó]
-```
+| Elemento | Contenido |
+|----------|-----------|
+| Evidencia utilizada | Hechos observables que sustentan la propuesta |
+| Datos utilizados | Fuentes, períodos, entidades, métricas |
+| Reglas utilizadas | Heurísticas, índices, umbrales activados |
+| Experiencias relacionadas | Casos Legacy con patrones similares |
+| Hipótesis utilizadas | Supuestos que conectan datos con conclusión |
+| Nivel de confianza | Grado de certeza y factores que lo modifican |
+| Alternativas descartadas | Qué más se consideró y por qué no se propone |
 
-Nunca: *"Haga esto."* sin más.
+Nunca entregar únicamente una recomendación. Nunca: *"Haga esto."* sin más.
 
-**Implicación arquitectónica:** Explainability Engine es transversal. No es decoración UI; es contrato de salida de todo motor.
+**Implicación arquitectónica:** Explainability Engine es transversal y actúa como **gate obligatorio** antes de cualquier salida al empresario.
+
+### Principio 5 — Control de complejidad
+
+Cada nueva capacidad — módulo, submódulo, integración, automatización — debe justificar:
+
+1. **¿Qué problema resuelve?**
+2. **¿Qué decisiones mejora?**
+3. **¿Qué conocimiento nuevo aporta?**
+
+Si no mejora la capacidad de decisión del empresario, **no se incorpora**.
+
+Este principio aplica a todo el horizonte de 10 años. La arquitectura aprobada es suficiente; no se agregan módulos sin pasar este filtro.
 
 ---
 
-## III. ARQUITECTURA GENERAL
+## IV. ARQUITECTURA GENERAL
 
-### III.1 Vista de capas
+### IV.1 Vista de capas
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -143,8 +200,8 @@ Nunca: *"Haga esto."* sin más.
 └─────────────────────────────────────────────────────────────────────────┘
                                     ↑
 ┌─────────────────────────────────────────────────────────────────────────┐
-│  BUSINESS BRAIN — Orquestador de inteligencia estratégica               │
-│  Sintetiza · Prioriza · Resuelve conflictos entre motores               │
+│  BUSINESS BRAIN — Sintetizador estratégico (NO decide)                  │
+│  Sintetiza · Detecta conflictos · Relaciona · Explica · Propone         │
 └─────────────────────────────────────────────────────────────────────────┘
                                     ↑
 ┌──────────────┬──────────────┬──────────────┬──────────────┬─────────────┐
@@ -178,19 +235,50 @@ Nunca: *"Haga esto."* sin más.
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-### III.2 El Knowledge Graph como columna vertebral
+### IV.2 El Knowledge Graph como columna vertebral
 
 Todos los Grandes Cerebros comparten un **grafo de conocimiento empresarial** gestionado por Knowledge Engine. No son silos.
 
+#### Regla fundamental: ninguna entidad aislada
+
+**Ninguna entidad puede quedar aislada. Todo debe relacionarse.**
+
+Cada entidad del sistema debe poder responder:
+
+> **¿Con qué otras entidades está relacionada?**
+
+Si una entidad no tiene relaciones, el sistema debe:
+1. Intentar inferirlas automáticamente, o
+2. Marcarla como `pending_relationship` para resolución, o
+3. Rechazar su ingesta hasta que pueda conectarse al grafo
+
+Entidades obligatoriamente conectables:
+
+| Dominio | Entidades |
+|---------|-----------|
+| Demanda | Clientes, consultas, segmentos |
+| Oferta | Productos, categorías |
+| Competencia | Competidores, importadores, publicaciones, precios |
+| Suministro | Proveedores, fábricas, importaciones, contenedores, fletes |
+| Memoria | Experiencias, heurísticas, decisiones |
+| Contexto | Economía, señales, índices |
+
 **Nodos principales:**
-`Persona`, `Empresa`, `Producto`, `Categoría`, `Cliente`, `Competidor`, `Importador`, `Proveedor`, `Fábrica`, `Contenedor`, `RutaLogística`, `Mercado`, `Decisión`, `Experiencia`, `Heurística`, `Señal`, `Índice`, `EventoEconómico`, `ObraConstrucción`, `CampañaPublicitaria`, `PublicaciónSocial`, `Venta`, `Consulta`
+`Persona`, `Empresa`, `Producto`, `Categoría`, `Cliente`, `Competidor`, `Importador`, `Proveedor`, `Fábrica`, `Contenedor`, `RutaLogística`, `Flete`, `Mercado`, `Decisión`, `Experiencia`, `Heurística`, `Señal`, `Índice`, `EventoEconómico`, `Precio`, `Importación`, `Venta`, `Consulta`
 
 **Aristas principales:**
-`importa`, `provee`, `compite_con`, `consulta_por`, `publica_sobre`, `decidió_sobre`, `resultó_en`, `similar_a`, `contradice`, `refuerza`, `abastece`, `fabrica_en`, `transporta_en`, `impacta_a`
+`importa`, `provee`, `compite_con`, `consulta_por`, `publica_sobre`, `decidió_sobre`, `resultó_en`, `similar_a`, `contradice`, `refuerza`, `abastece`, `fabrica_en`, `transporta_en`, `impacta_a`, `cuesta_flete`, `tiene_precio`, `aplica_en_contexto`
 
-**Regla:** Si dos motores hablan de la misma entidad, hablan del mismo nodo en el grafo.
+**Reglas del grafo:**
 
-### III.3 Primitiva universal: Decision Record
+| Regla | Descripción |
+|-------|-------------|
+| Unicidad | Si dos motores hablan de la misma entidad real, es el mismo nodo |
+| Conectividad | Toda entidad tiene ≥ 1 arista; idealmente ≥ 3 |
+| Trazabilidad | Toda arista tiene fuente y confianza |
+| Reutilización | Las relaciones importan más que los atributos aislados |
+
+### IV.3 Primitiva universal: Decision Record
 
 Propuesta arquitectónica crítica: toda la plataforma gira en torno a un objeto **`DecisionRecord`**.
 
@@ -210,7 +298,7 @@ Propuesta arquitectónica crítica: toda la plataforma gira en torno a un objeto
 
 Esto unifica Legacy Intelligence, Learning Engine y Explainability. **Sin DecisionRecord, no hay memoria estratégica real.**
 
-### III.4 Bus de eventos (Event Fabric)
+### IV.4 Bus de eventos (Event Fabric)
 
 | Evento | Productor | Consumidores |
 |--------|-----------|--------------|
@@ -228,13 +316,13 @@ Acoplamiento **asíncrono**. Los motores no se llaman directamente; publican y c
 
 ---
 
-## IV. LOS GRANDES CEREBROS
+## V. LOS GRANDES CEREBROS
 
 Cada cerebro es un **dominio de inteligencia** con: ingesta propia, modelo conceptual, índices, señales, y contribución al grafo. Ninguno es autosuficiente.
 
 ---
 
-### IV.1 Buyer Intelligence
+### V.1 Buyer Intelligence
 
 **Misión:** Entender quién compra, quién podría comprar, cómo evoluciona la demanda y qué impulsa las consultas — no gestionar contactos.
 
@@ -263,13 +351,10 @@ Cada cerebro es un **dominio de inteligencia** con: ingesta propia, modelo conce
 - ✅ Correcto alejarse del CRM: la demanda es señal estratégica, no ficha de contacto
 - ⚠️ Riesgo: confundir volumen de consultas con demanda real (bots, curiosidad, estudiantes)
 - ⚠️ Riesgo: privacidad — inteligencia de demanda sin vigilancia indebida
-- 💡 Mejora: separar **Demand Intelligence** (macro) de **Relationship Intelligence** (micro, opcional, para quien quiera gestionar relaciones sin que sea el centro)
-
-**Módulo sugerido no contemplado:** **Voice of Customer Engine** — NLP sobre consultas reales para extraer pain points, no solo contar volumen.
 
 ---
 
-### IV.2 Product Intelligence
+### V.2 Product Intelligence
 
 **Misión:** Comprender el ciclo de vida, viabilidad, margen, posicionamiento y destino estratégico de cada producto en el catálogo y en el mercado.
 
@@ -300,13 +385,25 @@ Cada cerebro es un **dominio de inteligencia** con: ingesta propia, modelo conce
 - ✅ Es el cerebro donde convergen la mayoría de señales operativas
 - ⚠️ Riesgo: sobre-optimizar margen a corto plazo ignorando posicionamiento estratégico
 - ⚠️ Riesgo: clasificación de ciclo de vida sin histórico suficiente
-- 💡 Mejora: **Portfolio Intelligence** como subcapa — el producto individual no se decide aislado
 
 ---
 
-### IV.3 Supply Intelligence
+### V.3 Supply Intelligence — Radar estratégico de suministro
 
-**Misión:** Convertir datos de comercio exterior, logística y cadena de suministro en inteligencia para decisiones de compra, stock, sourcing y riesgo.
+**Misión:** Convertir datos de comercio exterior, logística y cadena de suministro en un **radar estratégico** — no un repositorio de registros aduaneros.
+
+Supply Intelligence debe detectar continuamente:
+
+| Dimensión | Qué detecta | Decisión que habilita |
+|-----------|-------------|----------------------|
+| **Concentración de mercado** | Pocos importadores dominan una categoría | ¿Entrar es viable? ¿Hay espacio? |
+| **Dependencia de proveedores** | Un proveedor abastece a muchos competidores o concentra categoría | ¿Riesgo de canal? ¿Buscar alternativa? |
+| **Velocidad de reposición** | Frecuencia y plazo entre importaciones por producto/importador | ¿Cuánto stock necesito? ¿Cuándo reordenar? |
+| **Evolución de costos** | Tendencia de valor declarado, flete, landed cost | ¿Margen futuro? ¿Timing de compra? |
+| **Riesgo de desabastecimiento** | Caída de importaciones, concentración, flete ↑, lead time ↑ | ¿Asegurar stock? |
+| **Oportunidades de compra** | Flete bajando, importaciones bajas, consultas subiendo | ¿Adelantar compra? |
+| **Concentración por país** | Origen geográfico dominante en categoría | ¿Riesgo geopolítico? ¿Diversificar origen? |
+| **Concentración por proveedor** | Proveedor único o dominante en cadena | ¿Negociar? ¿Segundo sourcing? |
 
 **Documento detallado:** `docs/supply-intelligence-engine-diseno.md`
 
@@ -322,13 +419,31 @@ Cada cerebro es un **dominio de inteligencia** con: ingesta propia, modelo conce
 | **Factory Intelligence** | Planta/fábrica de origen cuando es identificable | Trazabilidad, riesgo de concentración |
 | **Container Intelligence** | Volúmenes en contenedores, tipos, rutas, frecuencia | Capacidad, estacionalidad logística |
 
-#### Freight Intelligence — requisitos reforzados
+#### Freight Intelligence — política permanente de histórico
 
-- Gráfica **siempre visible** del flete China → Uruguay/Río de la Plata (o proxy)
-- Histórico mínimo **24 meses**, arquitectura preparada para **5 años**
-- Tipos de contenedor: 20ft / 40ft / 40HC
-- Rutas proxy jerárquicas: Sudamérica → Brasil/Santos → Costa Este USA → Europa → índice global
-- Cruce con costo de reposición, timing de compra, guerra de precios
+Freight Intelligence no muestra solamente el valor actual. Es una **referencia estratégica permanente**.
+
+**Política de conservación de histórico:**
+
+| Parámetro | Valor |
+|-----------|-------|
+| Mínimo obligatorio | 24 meses |
+| Objetivo arquitectónico | 5 años |
+| Principio | Conservar el **mayor histórico posible** — nunca descartar datos históricos de flete |
+| Ruta primaria | China → Uruguay / Río de la Plata (o proxy jerárquico) |
+| Contenedores | 20ft / 40ft / 40HC |
+
+**Qué debe mostrar siempre (más allá del valor puntual):**
+
+| Elemento | Propósito |
+|----------|-----------|
+| Tendencia | Dirección estructural del costo logístico |
+| Ciclos | Patrones estacionales y recurrentes |
+| Promedios móviles 30/90 días | Filtrar ruido; detectar cambio de régimen |
+| Eventos extraordinarios | Picos COVID, bloqueos de canal, guerras comerciales, blank sailings |
+| Cambios relevantes | Cruces de medias, rupturas de rango, alertas de suba/baja fuerte |
+
+El tiempo aquí **ubica patrones** en la línea histórica; el razonamiento primario sigue siendo: ¿qué patrón se repite, qué consecuencia tiene para el costo de reposición, y qué señal emite para la decisión de compra?
 
 #### Supply Risk — diseño
 
@@ -342,17 +457,15 @@ Cada cerebro es un **dominio de inteligencia** con: ingesta propia, modelo conce
 
 #### Análisis crítico
 
-- ✅ Freight permanente es diferenciador real para importadores LATAM
-- ✅ Separar submódulos evita monolito incomprensible
-- ⚠️ Riesgo: calidad desigual de datos por país — Uruguay puede requerer proxies siempre
+- ✅ Como radar estratégico es el diferenciador central para importadores LATAM
+- ✅ Freight permanente con histórico largo es infraestructura, no feature
+- ⚠️ Riesgo: calidad desigual de datos por país — Uruguay puede requerir proxies siempre
 - ⚠️ Riesgo: Factory Intelligence tiene cobertura muy baja en BOL estándar
-- ⚠️ Riesgo: Container Intelligence sin valor declarado puede distorsionar volúmenes
-- 💡 Mejora: **Landed Cost Engine** transversal que unifica flete + arancel + tipo de cambio + valor declarado
-- 💡 Mejora: **Sourcing Scenario Engine** — "si cambio de China a Vietnam, ¿qué pasa con costo, plazo y riesgo?"
+- ⚠️ Riesgo: señales de concentración sin contexto de categoría generan falsos positivos
 
 ---
 
-### IV.4 Market Intelligence
+### V.4 Market Intelligence
 
 **Misión:** Comprender el ecosistema competitivo, precios, publicaciones, tendencias y dinámica del mercado en tiempo casi real e histórico.
 
@@ -367,13 +480,6 @@ Cada cerebro es un **dominio de inteligencia** con: ingesta propia, modelo conce
 
 **Entidades:** `Competitor`, `MarketPrice`, `DetectedPublication`, `Trend`, `MarketShareEstimate`, `PriceWarSignal`, `NarrativePattern`
 
-**Submódulos sugeridos:**
-- Competitor Intelligence
-- Price Intelligence
-- Publication Scanner
-- Trend Detector
-- Advertising Intelligence (ver sección VIII — módulo nuevo)
-
 **Cruces críticos:**
 - Market ↔ Supply (importaciones vs precios publicados)
 - Market ↔ Buyer (consultas vs oferta visible)
@@ -381,14 +487,13 @@ Cada cerebro es un **dominio de inteligencia** con: ingesta propia, modelo conce
 - Market ↔ Legacy (¿vivimos esta guerra de precios antes?)
 
 **Análisis crítico:**
-- ✅ Es el cerebro más cercano al "mercado visible"
+- ✅ Es el cerebro más cercano al mercado visible
 - ⚠️ Riesgo: scraping frágil, bloqueos, datos incompletos
 - ⚠️ Riesgo: precio publicado ≠ precio real de transacción
-- 💡 Mejora: **Narrative Intelligence** — no solo precio, sino cómo compite la competencia en mensaje
 
 ---
 
-### IV.5 Economic Intelligence
+### V.5 Economic Intelligence
 
 **Misión:** Contextualizar decisiones empresariales dentro del entorno macroeconómico: tipo de cambio, inflación, tasas, construcción, empleo, aranceles, ciclos.
 
@@ -412,12 +517,11 @@ Cada cerebro es un **dominio de inteligencia** con: ingesta propia, modelo conce
 **Análisis crítico:**
 - ✅ Imprescindible para importadores y distribuidores LATAM
 - ⚠️ Riesgo: indicadores macro son lentos — no sirven para decisiones tácticas solos
-- ⚠️ Riesgo: correlación ≠ causalidad (construcción sube, ¿por eso venden más sanitarios?)
-- 💡 Mejora: **Macro Scenario Layer** para What If Engine — "dólar a 50 vs 45"
+- ⚠️ Riesgo: correlación ≠ causalidad
 
 ---
 
-### IV.6 Knowledge Engine
+### V.6 Knowledge Engine
 
 **Misión:** Gestionar el grafo de conocimiento, la ontología, la memoria estructurada y las relaciones entre todas las entidades y artefactos intelectuales.
 
@@ -434,14 +538,13 @@ Cada cerebro es un **dominio de inteligencia** con: ingesta propia, modelo conce
 
 **Análisis crítico:**
 - ✅ Sin esto, los cerebros son islas
-- ⚠️ Riesgo: ontología demasiado rígida al inicio — paralysis by design
-- ⚠️ Riesgo: grafo a escala 10 años puede volverse inconsultable
-- 💡 Mejora: ontología **evolutiva** con versiones; empezar mínima, expandir por uso real
-- 💡 Mejora: **Semantic Layer** unificado para que todos los motores hablen el mismo lenguaje de categorías
+- ⚠️ Riesgo: ontología demasiado rígida al inicio
+- ⚠️ Riesgo: entidades huérfanas si no se aplica la regla de no aislamiento
+- ⚠️ Riesgo: grafo a escala 10 años puede volverse inconsultable sin índices semánticos
 
 ---
 
-### IV.7 Learning Engine
+### V.7 Learning Engine
 
 **Misión:** Cerrar el ciclo de aprendizaje: capturar resultados, calibrar confianza, validar o invalidar heurísticas, mejorar predicciones.
 
@@ -466,43 +569,54 @@ Cada cerebro es un **dominio de inteligencia** con: ingesta propia, modelo conce
 - ✅ Es lo que convierte software en activo compuesto
 - ⚠️ Riesgo: feedback escaso — empresarios no documentan decisiones
 - ⚠️ Riesgo: aprendizaje de errores sin contexto reproduce sesgos
-- ⚠️ Riesgo: catastrophic forgetting si se prioriza lo reciente
-- 💡 Mejora: **Decision Journal** UX mínima — 3 campos post-decisión, no formulario largo
-- 💡 Mejora: pesos temporales — reciente importa más, pero Legacy nunca desaparece
+- ⚠️ Riesgo: catastrophic forgetting si se prioriza lo reciente sobre patrones validados
 
 ---
 
-### IV.8 Business Brain
+### V.8 Business Brain
 
-**Misión:** Orquestador estratégico. Sintetiza señales de todos los cerebros, resuelve conflictos, prioriza, y produce recomendaciones unificadas con explicación completa.
+**Misión:** Sintetizador estratégico. **No decide.** La decisión final siempre pertenece al empresario.
 
-**Ejemplo de conflicto:**
-- Supply dice: "adelantar compra, flete subiendo"
-- Product dice: "producto en saturación, no agregar stock"
-- Legacy dice: "la última vez que adelantamos compra en saturación, tuvimos sobrestock 8 meses"
+Business Brain **no es un oráculo ni un autopiloto**. Es la capa que hace legible la complejidad de múltiples cerebros.
 
-**Business Brain debe:**
-1. Presentar las tres perspectivas
-2. Ponderar por confianza y recencia
-3. Recomendar con matices
-4. Nunca ocultar el conflicto
+| Función | Qué hace | Qué NO hace |
+|---------|----------|-------------|
+| **Sintetizar** | Unifica señales de todos los cerebros en narrativa coherente | No elige por el empresario |
+| **Detectar conflictos** | Muestra cuando cerebros discrepan explícitamente | No oculta contradicciones |
+| **Relacionar información** | Conecta patrones entre dominios vía Knowledge Graph | No opera en silos |
+| **Explicar** | Produce narrativa comprensible con evidencia | No entrega conclusiones opacas |
+| **Justificar** | Cita datos, reglas, experiencias e hipótesis | No dice "haga esto" sin sustento |
+| **Proponer hipótesis** | Sugiere líneas de acción como posibilidades, no órdenes | No ejecuta ni impone |
 
-**No es un LLM suelto.** Es una capa de síntesis con reglas, scores y citas obligatorias.
+**Ejemplo de conflicto presentado (no resuelto unilateralmente):**
+- Supply señala patrón: flete subiendo → costo de reposición aumentará
+- Product señala patrón: categoría en saturación → riesgo de sobrestock
+- Legacy cita experiencia: adelantar compra en saturación → sobrestock 8 meses (confianza 0.82)
+
+**Business Brain presenta:**
+1. Los tres patrones con sus evidencias
+2. El conflicto explícito
+3. Hipótesis posibles (adelantar parcialmente / esperar / buscar variante)
+4. Confianza y riesgos de cada hipótesis
+5. **El empresario decide**
+
+**No es un LLM suelto.** Es síntesis con reglas, scores, citas obligatorias y gate de Explainability Engine.
 
 **Análisis crítico:**
-- ✅ Necesario — sin orquestador, el usuario recibe 9 alertas contradictorias
-- ⚠️ Riesgo: convertirse en caja negra si se delega todo a un modelo generativo
-- ⚠️ Riesgo: single point of failure conceptual
-- 💡 Mejora: **Conflict Resolution Protocol** documentado — cómo se pondera Legacy vs datos recientes
-- 💡 Mejora: modo "solo presentar opciones" vs "recomendar" — el empresario elige el modo
+- ✅ Necesario para evitar 9 alertas contradictorias sin contexto
+- ⚠️ Riesgo: degenerar en chatbot que "recomienda" sin evidencia
+- ⚠️ Riesgo: usuario delega decisión implícitamente si la síntesis parece conclusiva
+- Mitigación: lenguaje de hipótesis, nunca imperativo; decisión explícitamente humana
 
 ---
 
-### IV.9 Legacy Intelligence
+### V.9 Legacy Intelligence — Preservación de experiencia empresarial
 
-**Misión:** Preservar la experiencia empresarial como activo estratégico estructurado. **Especialmente errores, crisis y fracasos** — no solo éxitos.
+#### Modelo de experiencia — conocimiento reutilizable
 
-#### Modelo de experiencia
+**El objetivo NO es escribir un diario. El objetivo es construir conocimiento reutilizable.**
+
+Cada experiencia se estructura como:
 
 ```
 Contexto
@@ -511,16 +625,22 @@ Problema
     ↓
 Opciones consideradas
     ↓
-Decisión tomada
+Decisión
     ↓
-Resultado observado
+Resultado
     ↓
-Aprendizaje extraído
+Aprendizaje
+    ↓
+Cuándo volvería a aplicar
+    ↓
+Cuándo NO volvería a aplicar
     ↓
 Nivel de confianza
     ↓
 Relación con otras experiencias
 ```
+
+Los campos **"cuándo volvería a aplicar"** y **"cuándo NO volvería a aplicar"** son lo que transforman una historia en conocimiento transferible entre contextos. El tiempo de ocurrencia es metadata; el patrón es el activo.
 
 #### Qué capturar
 
@@ -546,7 +666,9 @@ Relación con otras experiencias
 | options | jsonb | Opciones que se consideraron |
 | decision | text | Qué se decidió |
 | outcome | text | Qué pasó (éxito, fracaso, mixto) |
-| lesson | text | Aprendizaje explícito |
+| lesson | text | Aprendizaje explícito y reutilizable |
+| applies_when | text | Cuándo volvería a aplicar este aprendizaje |
+| does_not_apply_when | text | Cuándo NO volvería a aplicar — tan importante como el aprendizaje |
 | confidence | float | Qué tan aplicable es hoy |
 | emotional_weight | enum | low, medium, high — decisiones traumáticas importan |
 | tags | string[] | categoría, producto, proveedor, mercado |
@@ -586,18 +708,16 @@ Relación con otras experiencias
 
 - ✅ Es el activo más difícil de replicar y el más valioso a 10 años
 - ⚠️ Riesgo: captura lenta — sin hábito, queda vacío
+- ⚠️ Riesgo: degenerar en diario narrativo sin estructura reutilizable
 - ⚠️ Riesgo: sesgo del fundador — sus heurísticas dominan el sistema
-- ⚠️ Riesgo: experiencias viejas aplicadas a contextos nuevos
-- ⚠️ Riesgo: información sensible (proveedores, márgenes) en texto libre
-- 💡 Mejora: **Experience Interview Mode** — guía conversacional para extraer experiencias sin formularios
-- 💡 Mejora: **Contested Heuristics** — cuando datos actuales contradicen Legacy, mostrar el debate explícitamente
-- 💡 Mejora: **Succession Mode** — transmisión estructurada a siguiente generación
+- ⚠️ Riesgo: experiencias viejas aplicadas a contextos nuevos sin revisar `does_not_apply_when`
+- ⚠️ Riesgo: información sensible en texto libre
 
 ---
 
-## V. MOTORES TRANSVERSALES
+## VI. MOTORES TRANSVERSALES
 
-### V.1 Prediction Engine
+### VI.1 Prediction Engine
 
 **Misión:** Generar proyecciones con horizonte, intervalo de confianza y variables consideradas.
 
@@ -617,9 +737,9 @@ predicción + horizonte + intervalo + variables + confianza + qué invalidaría 
 
 **Análisis crítico:**
 - ⚠️ Riesgo: falsa precisión — mostrar decimales donde hay incertidumbre
-- 💡 Mejora: siempre en bandas, nunca punto único para decisiones estratégicas
+- Mitigación: siempre en bandas; patrones primero, tiempo como ubicación
 
-### V.2 Why Engine
+### VI.2 Why Engine
 
 **Misión:** Responder "¿por qué?" — causalidad operativa, no solo correlación.
 
@@ -631,7 +751,7 @@ predicción + horizonte + intervalo + variables + confianza + qué invalidaría 
 
 Combina datos, experiencias y heurísticas. Produce árbol de causas con pesos.
 
-### V.3 What If Engine
+### VI.3 What If Engine
 
 **Misión:** Simulación de escenarios contrafactuales.
 
@@ -644,30 +764,46 @@ Combina datos, experiencias y heurísticas. Produce árbol de causas con pesos.
 
 Consume Market Digital Twin como sandbox.
 
-### V.4 Explainability Engine
+### VI.4 Explainability Engine
 
-**Misión:** Garantizar que toda salida del sistema cumpla el Principio 4.
+**Misión:** Garantizar que toda salida hacia el empresario cumpla el Principio 4 y los `FOUNDATIONAL_PRINCIPLES.md`.
 
-**No es un módulo opcional de UI.** Es el formateador y validador de explicaciones antes de que lleguen al usuario.
+**No es decoración de UI.** Es el validador y ensamblador obligatorio de explicaciones.
+
+**Contrato de salida hacia el empresario:**
+
+| # | Elemento | Obligatorio |
+|---|---------|-------------|
+| 1 | Propuesta / hipótesis | Sí — en lenguaje de posibilidad, no imperativo |
+| 2 | Evidencia utilizada | Sí |
+| 3 | Datos utilizados (fuentes, períodos) | Sí |
+| 4 | Reglas utilizadas (heurísticas, índices) | Sí |
+| 5 | Experiencias relacionadas (Legacy) | Si existen |
+| 6 | Hipótesis utilizadas | Sí |
+| 7 | Nivel de confianza | Sí |
+| 8 | Alternativas descartadas | Sí |
+
+Si Explainability Engine no puede completar los elementos obligatorios, **la propuesta no se entrega**.
 
 | Componente | Función |
 |------------|---------|
-| Evidence assembler | Reúne citas de datos |
-| Experience linker | Encuentra Legacy relevante |
+| Evidence assembler | Reúne evidencia y datos con fuentes |
+| Rule tracer | Identifica qué heurísticas e índices se activaron |
+| Experience linker | Encuentra Legacy con patrones similares |
+| Hypothesis articulator | Explicita supuestos |
 | Confidence explainer | Desglosa factores de confianza |
-| Risk surfacer | Lista riesgos de la recomendación |
-| Alternative generator | Qué más se consideró |
-| Plain language renderer | Narrativa comprensible |
+| Alternative generator | Documenta opciones descartadas |
+| Plain language renderer | Narrativa comprensible para el empresario |
 
 ---
 
-## VI. MARKET DIGITAL TWIN
+## VII. MARKET DIGITAL TWIN
 
-### VI.1 Concepto
+### VII.1 Concepto
 
 Un **gemelo digital** es una representación viva, conectada y simulable del mercado y de la empresa dentro de él. No es un dashboard. Es un modelo relacional del mundo en el que opera el empresario.
 
-### VI.2 Entidades representadas
+### VII.2 Entidades representadas
 
 | Dominio | Entidades en el gemelo |
 |---------|------------------------|
@@ -682,18 +818,18 @@ Un **gemelo digital** es una representación viva, conectada y simulable del mer
 | Ventas | Volúmenes, márgenes, estacionalidad |
 | Memoria | Experiencias, heurísticas, decisiones pasadas |
 
-### VI.3 Propiedades del gemelo
+### VII.3 Propiedades del gemelo
 
 | Propiedad | Descripción |
 |-----------|-------------|
-| Conectado | Toda entidad tiene relaciones explícitas |
-| Temporal | Estado en cualquier punto del histórico (mínimo 24m, objetivo 5-10 años) |
+| Conectado | Toda entidad tiene relaciones explícitas — ninguna aislada |
+| Patrón-first | Estado descrito por relaciones y señales; tiempo como ubicación histórica |
 | Simulable | What If Engine opera sobre el gemelo |
 | Observable | Señales en tiempo casi real actualizan el estado |
 | Explicable | Cada relación tiene fuente y confianza |
 | Vivo | Se actualiza con cada ingesta y cada decisión registrada |
 
-### VI.4 Arquitectura del gemelo
+### VII.4 Arquitectura del gemelo
 
 ```
 Market Digital Twin
@@ -705,32 +841,13 @@ Market Digital Twin
 └── View Layer (representaciones — NO diseñar UI aquí, solo contratos de vista)
 ```
 
-### VI.5 Análisis crítico
+### VII.5 Análisis crítico
 
-- ✅ Visión correcta a 10 años — es el integrador natural de todos los cerebros
-- ⚠️ Riesgo: intentar construir el gemelo completo en fase 1 — imposible
-- ⚠️ Riesgo: mantenimiento ontológico costoso
+- ✅ Integrador natural de todos los cerebros a 10 años
+- ⚠️ Riesgo: construir el gemelo completo en fase 1
+- ⚠️ Riesgo: entidades huérfanas si no se aplica regla de conectividad
 - ⚠️ Riesgo: simulaciones con datos incompletos generan falsa confianza
-- 💡 Mejora: **Gemelo por dominio** primero (Supply Twin, Market Twin) → fusión progresiva
-- 💡 Mejora: indicador de **completitud del gemelo** por zona — "simulación con 40% de entidades, baja confianza"
-
----
-
-## VII. MÓDULOS ADICIONALES PROPUESTOS
-
-Módulos no pedidos explícitamente pero arquitectónicamente necesarios:
-
-| Módulo | Misión | Por qué |
-|--------|--------|---------|
-| **Decision Intelligence** | Meta-capa de calidad de decisiones | Medir si las decisiones mejoran con el tiempo |
-| **Regulatory Intelligence** | Aranceles, normas, compliance importación | Impacto directo en landed cost y viabilidad |
-| **Construction Intelligence** | Actividad de obra pública y privada | Driver de demanda en múltiples categorías LATAM |
-| **Advertising Intelligence** | Gasto y presencia publicitaria de competencia | Anticipar movimientos de mercado |
-| **Capital Intelligence** | Liquidez, costo de capital, ciclo de caja | Decisiones de stock requieren dinero |
-| **Relationship Intelligence** | Relaciones comerciales profundas (evolución del CRM) | Opcional, no central — relaciones como contexto, no como objetivo |
-| **Reputation Intelligence** | Señales de reputación de proveedores y competidores | Riesgo de cadena de suministro |
-| **Temporal Intelligence** | Estacionalidad, ciclos, calendario comercial | Casi todo es temporal; merece motor dedicado |
-| **Confidence Propagation Engine** | Propagar incertidumbre entre motores | Si flete tiene baja confianza, margen proyectado también |
+- Mitigación: gemelo por dominio primero; indicador de completitud visible
 
 ---
 
@@ -740,32 +857,35 @@ Módulos no pedidos explícitamente pero arquitectónicamente necesarios:
 |---|--------|-----------|------------|
 | 1 | **Complejidad prematura** — 9 cerebros + 4 motores + gemelo desde día 1 | Crítica | Roadmap por fases; gemelo por dominio; ontología mínima |
 | 2 | **Legacy vacío** — sin hábito de captura, el activo estrella no existe | Crítica | UX de captura mínima; Decision Journal; entrevistas guiadas |
-| 3 | **Contradicciones no resueltas** — motores dicen cosas opuestas | Alta | Business Brain con protocolo de conflicto explícito |
-| 4 | **Falsa confianza** — predicciones y simulaciones con datos incompletos | Alta | Confidence obligatorio; completitud del gemelo visible |
-| 5 | **Sesgo del fundador** — heurísticas de una persona dominan | Alta | Contested heuristics; diversidad de fuentes Legacy |
-| 6 | **Privacidad y sensibilidad** — experiencias con datos confidenciales | Alta | Clasificación de sensibilidad; acceso por rol |
-| 7 | **Dependencia de datos externos** — licencias, scraping, lag | Alta | Multi-fuente; proxies; transparencia de lag |
-| 8 | **LLM como atajo** — Business Brain degenera en chatbot sin evidencia | Alta | Explainability Engine como gate obligatorio |
-| 9 | **Catastrophic forgetting** — aprendizaje reciente borra sabiduría vieja | Media | Pesos temporales con piso para Legacy |
-| 10 | **Costo de mantenimiento 10 años** — ontología, integraciones, fuentes | Media | Diseño modular; contratos estables; automatización de linaje |
-| 11 | **Adopción** — sistema brillante que nadie alimenta | Crítica | Valor desde fase 1 sin Legacy completo; cada fase útil sola |
-| 12 | **Scope creep hacia ERP** — intentar operar la empresa | Media | Límite claro: inteligencia estratégica, no operación |
+| 3 | **Contradicciones no resueltas** — motores dicen cosas opuestas | Alta | Business Brain presenta conflictos; empresario decide |
+| 4 | **Falsa confianza** — predicciones con datos incompletos | Alta | Confidence obligatorio; completitud del gemelo visible |
+| 5 | **Sesgo del fundador** — heurísticas de una persona dominan | Alta | `does_not_apply_when`; heurísticas contested |
+| 6 | **Privacidad y sensibilidad** — experiencias confidenciales | Alta | Clasificación de sensibilidad; acceso por rol |
+| 7 | **Dependencia de datos externos** — licencias, lag | Alta | Multi-fuente; proxies; transparencia de lag |
+| 8 | **Business Brain como decisor** — usuario delega sin querer | Alta | Lenguaje de hipótesis; decisión explícitamente humana |
+| 9 | **Entidades huérfanas** — datos sin relaciones en el grafo | Alta | Regla de no aislamiento; rechazo de ingesta |
+| 10 | **Razonamiento temporal primero** — ignorar patrones | Media | Modelo de razonamiento patrón-first (Sección II) |
+| 11 | **Legacy como diario** — historias no reutilizables | Alta | Campos `applies_when` / `does_not_apply_when` obligatorios |
+| 12 | **Scope creep** — agregar módulos sin justificación | Alta | Principio 5 de control de complejidad |
+| 13 | **Adopción** — sistema que nadie alimenta | Crítica | Valor desde fase 1; captura mínima de experiencias |
+| 14 | **Scope creep hacia ERP/CRM** | Media | Límites en FOUNDATIONAL_PRINCIPLES.md |
 
 ---
 
-## IX. CRÍTICA AL DISEÑO ANTERIOR Y MEJORAS APLICADAS
+## IX. CONSOLIDACIÓN v1.1 — MEJORAS APLICADAS
 
-| Diseño anterior | Problema | Mejora en este blueprint |
-|-----------------|----------|--------------------------|
-| Mercadeo IA como CRM inteligente | Objetivo incorrecto — gestiona en vez de potenciar | OS de Inteligencia Estratégica |
-| Supply Intelligence aislado | Módulo de datos sin memoria ni experiencia | Integrado al grafo + Legacy + Business Brain |
-| Recomendaciones tipo "compre" | Sin explicación ni contexto | Principio 4 + Explainability Engine |
-| Gráficas como fin | Visualización sin decisión | Toda gráfica ligada a decisión y señal |
-| Product Intelligence mencionado pero no diseñado | Hueco arquitectónico | Cerebro completo con submódulos |
-| Sin modelo de experiencia | Pérdida de conocimiento inevitable | Legacy Intelligence como infraestructura |
-| Sin orquestador | Alertas contradictorias | Business Brain con resolución de conflictos |
-| Sin gemelo | Cruces manuales entre motores | Market Digital Twin progresivo |
-| Freight como feature | Debe ser permanente y estratégico | Widget permanente, 24m-5a, cruce con reposición |
+| Área | Mejora |
+|------|--------|
+| Razonamiento | Patrones, relaciones y causas primero; tiempo como ubicación histórica |
+| Legacy | Conocimiento reutilizable con `applies_when` / `does_not_apply_when` |
+| Knowledge Graph | Regla fundamental: ninguna entidad aislada |
+| Explainability | 8 elementos obligatorios; gate antes de entregar al empresario |
+| Supply Intelligence | Radar estratégico con 8 dimensiones de detección |
+| Freight | Política permanente de histórico: mín 24m, objetivo 5a, patrones y ciclos |
+| Business Brain | Sintetiza y propone hipótesis; nunca decide |
+| Complejidad | Filtro de 3 preguntas para toda capacidad nueva |
+| Constitución | `FOUNDATIONAL_PRINCIPLES.md` como documento rector no técnico |
+| Módulos | Arquitectura cerrada; no se agregan módulos sin justificación |
 
 ---
 
@@ -792,9 +912,9 @@ Módulos no pedidos explícitamente pero arquitectónicamente necesarios:
 - Supply: Supply Risk, Proveedor Intelligence
 - Learning Engine: outcome tracking básico
 - Heurísticas: crear, consultar, evolucionar confianza
-- Business Brain: síntesis simple (sin ML pesado)
+- Business Brain: síntesis y detección de conflictos (no decisión)
 
-**Criterio de éxito:** Recomendaciones explicadas con evidencia cruzando 3+ fuentes.
+**Criterio de éxito:** Propuestas explicadas con los 8 elementos obligatorios cruzando 3+ fuentes.
 
 ### Fase 2 — Producto y economía (Año 2 — 3)
 **Objetivo:** Decisiones de catálogo y margen.
@@ -811,39 +931,32 @@ Módulos no pedidos explícitamente pero arquitectónicamente necesarios:
 ### Fase 3 — Memoria estratégica (Año 3 — 4)
 **Objetivo:** El activo Legacy cobra vida.
 
-- Legacy Intelligence maduro: entrevistas, heurísticas contested
+- Legacy Intelligence maduro: `applies_when` / `does_not_apply_when` obligatorios
 - Learning Engine: calibración de confianza
 - What If Engine
 - Factory Intelligence (donde haya datos)
-- Construction Intelligence
 - Digital Twin: fusión Supply + Market + Economic
 
-**Criterio de éxito:** Una recomendación cita automáticamente una experiencia de hace 10 años relevante.
+**Criterio de éxito:** Una propuesta cita automáticamente una experiencia con patrón similar, indicando cuándo aplica y cuándo no.
 
 ### Fase 4 — Gemelo y predicción (Año 4 — 6)
 **Objetivo:** Simulación estratégica.
 
 - Market Digital Twin integrado
 - Prediction Engine avanzado con bandas
-- Advertising Intelligence
-- Regulatory Intelligence
-- Capital Intelligence
-- Temporal Intelligence
+- Why Engine maduro
 
-**Criterio de éxito:** What If de escenario macro completo en < 30 segundos con explicación.
+**Criterio de éxito:** What If de escenario completo con explicación y confianza explícita.
 
 ### Fase 5 — OS maduro (Año 6 — 10)
 **Objetivo:** Activo intelectual de décadas.
 
-- Business Brain con resolución de conflictos madura
-- Succession Mode (transmisión generacional)
-- Confidence Propagation Engine
-- Reputation Intelligence
-- Gemelo con 5-10 años de histórico
-- Decision Intelligence (¿mejoramos nuestras decisiones?)
+- Business Brain con síntesis madura y conflictos explícitos
+- Gemelo con 5-10 años de histórico (flete, importaciones, precios)
 - Aprendizaje compuesto visible: métricas de calidad de decisión
+- Transmisión generacional de Legacy
 
-**Criterio de éxito:** Una empresa puede incorporar un nuevo CEO y en 30 días acceder a décadas de experiencia estructurada, cruzada con señales actuales, para decidir con contexto.
+**Criterio de éxito:** Un nuevo decisor accede en 30 días a décadas de experiencia estructurada, cruzada con señales actuales, para decidir con contexto.
 
 ---
 
@@ -851,15 +964,15 @@ Módulos no pedidos explícitamente pero arquitectónicamente necesarios:
 
 | Métrica | Qué mide |
 |---------|----------|
-| Decision Quality Index | ¿Los resultados mejoran cuando se sigue el sistema? |
+| Decision Quality Index | ¿Los resultados mejoran cuando el empresario usa el sistema? |
 | Legacy Coverage | % de decisiones estratégicas con experiencia relacionada |
-| Explanation Completeness | % de recomendaciones con los 6 elementos obligatorios |
+| Explanation Completeness | % de propuestas con los 8 elementos obligatorios |
+| Knowledge Reusability | % de experiencias con `applies_when` y `does_not_apply_when` completos |
+| Graph Connectivity | % de entidades con ≥ 3 relaciones en el grafo |
 | Confidence Calibration | Correlación entre confianza declarada y acierto real |
 | Heuristic Health | Ratio validadas vs invalidadas por heurística |
-| Time to Insight | Tiempo desde señal hasta recomendación explicada |
-| Knowledge Half-life | Cuánto tiempo tarda una experiencia en quedar obsoleta |
+| Pattern Detection Rate | Señales generadas por patrones vs por umbrales temporales simples |
 | Adoption Depth | ¿Cuántos decisores usan y alimentan el sistema? |
-| Uncertainty Reduction | ¿Se reduce la varianza de resultados negativos evitables? |
 | Succession Readiness | ¿Puede un nuevo decisor operar con contexto en < 30 días? |
 
 ---
@@ -869,6 +982,8 @@ Módulos no pedidos explícitamente pero arquitectónicamente necesarios:
 ```
                          ┌─────────────────┐
                          │  BUSINESS BRAIN │
+                         │  (sintetiza, NO │
+                         │   decide)       │
                          └────────┬────────┘
                                   │
         ┌────────────┬────────────┼────────────┬────────────┐
@@ -920,12 +1035,15 @@ Módulos no pedidos explícitamente pero arquitectónicamente necesarios:
 | Motor transversal | Capacidad que atraviesa todos los dominios (Prediction, Why, etc.) |
 | DecisionRecord | Primitiva que captura contexto → decisión → resultado → aprendizaje |
 | Heurística | Regla nacida de experiencia con contexto, excepciones y confianza |
-| Experiencia | Relato estructurado de una situación vivida con aprendizaje |
-| Señal | Observación procesada que puede generar alerta o recomendación |
-| Gemelo digital | Representación conectada, temporal y simulable del mercado |
+| Experiencia | Conocimiento estructurado reutilizable — no un relato anecdótico |
+| Señal | Observación de patrón que puede generar alerta o hipótesis |
+| Gemelo digital | Representación conectada y simulable del mercado — sin entidades aisladas |
 | Confianza | Grado de certeza explícito, siempre visible, siempre calibrable |
 | Legacy | Conjunto de experiencias y heurísticas preservadas |
 | Flywheel | Ciclo experiencia → conocimiento → inteligencia → decisión → experiencia |
+| Patrón-first | Modelo de razonamiento donde patrones y relaciones preceden al tiempo |
+| Hipótesis | Propuesta del sistema al empresario — no una orden |
+| Radar estratégico | Supply Intelligence como detector continuo de riesgos y oportunidades |
 
 ---
 
@@ -933,15 +1051,18 @@ Módulos no pedidos explícitamente pero arquitectónicamente necesarios:
 
 Mercadeo IA, concebido así, no compite con CRMs ni con herramientas de BI.
 
-Compite por ser **la memoria estratégica de una empresa** — el lugar donde la experiencia de décadas se encuentra con la señal del presente para reducir la incertidumbre del futuro.
+Compite por ser **la memoria estratégica de una empresa** — el lugar donde los patrones de décadas se encuentran con las señales del presente para reducir la incertidumbre del futuro.
 
-La pregunta que debe responder en cada fase del roadmap no es *"¿qué feature construimos?"* sino:
+La pregunta rectora de cada fase del roadmap:
 
-> **¿Esta capacidad ayuda a un empresario a tomar una mejor decisión, con más contexto, más evidencia, y más sabiduría acumulada que ayer?**
+> **¿Ayuda realmente al empresario a tomar una mejor decisión que la que tomaría sin el sistema?**
 
-Si la respuesta es sí, se construye. Si no, no pertenece a este sistema.
+Si la respuesta es sí, se construye. Si no, no pertenece aquí — sin importar cuán sofisticado parezca.
+
+La decisión final siempre es del empresario. Mercadeo IA amplía su capacidad de observar, comprender, recordar, relacionar, aprender y decidir.
 
 ---
 
-*Master Blueprint v1.0 — Mercadeo IA, Sistema Operativo de Inteligencia Estratégica para Empresas.*  
+*Master Blueprint v1.1 — Mercadeo IA, Sistema Operativo de Inteligencia Estratégica para Empresas.*  
+*Constitución: `FOUNDATIONAL_PRINCIPLES.md`*  
 *Sin implementación. Documento rector para desarrollo 2026–2036.*
