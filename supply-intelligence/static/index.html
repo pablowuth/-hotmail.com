@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Supply Intelligence — Importaciones Construcción</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="/assets/styles.css" />
+</head>
+<body>
+  <header class="header">
+    <div>
+      <p class="eyebrow">Mercadeo IA · Supply Intelligence</p>
+      <h1>Importaciones de Construcción</h1>
+      <p class="subtitle">Costo desaduanizado, tendencias, importadores y alertas de variación</p>
+    </div>
+    <div class="filters">
+      <label for="productFilter">Producto</label>
+      <select id="productFilter">
+        <option value="">Todos los productos</option>
+      </select>
+      <button id="refreshBtn" class="btn">Actualizar</button>
+      <button id="ingestBtn" class="btn btn-secondary">Sincronizar fuentes</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="kpis" id="kpis"></section>
+
+    <section class="grid-2">
+      <article class="card">
+        <h2>Tendencia de costo desaduanizado (USD/unidad)</h2>
+        <canvas id="costChart"></canvas>
+      </article>
+      <article class="card">
+        <h2>Volumen importado (cantidad)</h2>
+        <canvas id="volumeChart"></canvas>
+      </article>
+    </section>
+
+    <section class="grid-2">
+      <article class="card">
+        <h2>Composición de costo (FOB · Flete · Arancel)</h2>
+        <canvas id="compositionChart"></canvas>
+      </article>
+      <article class="card">
+        <h2>Alertas de variación</h2>
+        <div id="alertsList" class="alerts-list"></div>
+      </article>
+    </section>
+
+    <section class="card">
+      <h2>Ranking de importadores</h2>
+      <div class="table-wrap">
+        <table id="importersTable">
+          <thead>
+            <tr>
+              <th>Importador</th>
+              <th>RUT/CUIT</th>
+              <th>Operaciones</th>
+              <th>Valor desaduanizado</th>
+              <th>Cantidad</th>
+              <th>Costo prom./unidad</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Últimas operaciones</h2>
+      <div class="table-wrap">
+        <table id="operationsTable">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Importador</th>
+              <th>Proveedor</th>
+              <th>Producto</th>
+              <th>Cant.</th>
+              <th>FOB</th>
+              <th>Flete</th>
+              <th>Arancel</th>
+              <th>Tasas</th>
+              <th>USD/unidad</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Fuentes: CSV seed · Mock Trade API (Volza/Panjiva/aduanas) · Cálculo CIF + arancel + tasas</p>
+  </footer>
+
+  <script src="/assets/app.js"></script>
+</body>
+</html>
