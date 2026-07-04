@@ -7,21 +7,21 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 
 from app.database import Base, engine, get_db
-from app.etl.connectors.csv_connector import CsvImportConnector
-from app.etl.connectors.mock_api_connector import MockTradeApiConnector
+from app.etl.connectors.datospublicos_snapshot_connector import DatosPublicosSnapshotConnector
+from app.etl.connectors.datospublicos_uy_connector import DatosPublicosUyConnector
 from app.etl.pipeline import run_etl
+from app.models import ImportOperation
 from app.services import analytics
 from app.services.change_detector import detect_variations
 
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
-SEED_CSV = Path(__file__).resolve().parent.parent / "data" / "seed" / "importaciones_construccion.csv"
 
 
 def create_app() -> FastAPI:
     app = FastAPI(
-        title="Supply Intelligence — Importaciones Construcción",
-        description="Dashboard de importaciones con costo desaduanizado, tendencias y alertas",
-        version="1.0.0",
+        title="Supply Intelligence — Importaciones Construcción Uruguay",
+        description="Dashboard con datos reales de importaciones Uruguay (datospublicos.uy / DNA)",
+        version="2.0.0",
     )
 
     app.add_middleware(
@@ -34,11 +34,32 @@ def create_app() -> FastAPI:
     @app.on_event("startup")
     def startup():
         Base.metadata.create_all(bind=engine)
-        _ensure_seed_data()
+        from app.database import SessionLocal
+
+        db = SessionLocal()
+        try:
+            if db.query(ImportOperation).count() == 0:
+                run_etl(db, [DatosPublicosSnapshotConnector()])
+                detect_variations(db)
+        finally:
+            db.close()
 
     @app.get("/api/health")
     def health():
         return {"status": "ok"}
+
+    @app.get("/api/meta")
+    def meta(db: Session = Depends(get_db)):
+        return {
+            "sources": analytics.get_data_sources(db),
+            "field_coverage": analytics.get_field_coverage(db),
+            "notes": [
+                "Importador, valor USD, kg, origen y producto provienen de datospublicos.uy (DNA).",
+                "Proveedor, FOB, flete y aranceles no están en la fuente pública gratuita — se muestran vacíos.",
+                "USD/kg es un proxy de precio cuando hay valor y peso declarados.",
+                "Descarga CSV completa en datospublicos.uy requiere plan Pro.",
+            ],
+        }
 
     @app.get("/api/categories")
     def categories(db: Session = Depends(get_db)):
@@ -84,17 +105,19 @@ def create_app() -> FastAPI:
         return analytics.get_alerts(db, product, severity)
 
     @app.post("/api/ingest")
-    def ingest(db: Session = Depends(get_db)):
-        connectors = [CsvImportConnector(SEED_CSV)]
-        if SEED_CSV.exists():
-            result = run_etl(db, connectors)
-        else:
-            result = {"inserted": 0, "skipped": 0, "connectors": 0}
-        mock_result = run_etl(db, [MockTradeApiConnector(days_back=14, records_per_day=2)])
-        result["inserted"] += mock_result["inserted"]
-        result["skipped"] += mock_result["skipped"]
+    def ingest(
+        max_pages: int = Query(40, ge=5, le=200),
+        db: Session = Depends(get_db),
+    ):
+        connector = DatosPublicosUyConnector(
+            max_tabla_pages=max_pages,
+            fetch_importer_histories=True,
+            request_delay_sec=0.35,
+        )
+        result = run_etl(db, [connector])
         alerts = detect_variations(db)
         result["alerts_generated"] = len(alerts)
+        result["source"] = "datospublicos.uy"
         return result
 
     @app.post("/api/recalculate-alerts")
@@ -110,20 +133,6 @@ def create_app() -> FastAPI:
             return FileResponse(STATIC_DIR / "index.html")
 
     return app
-
-
-def _ensure_seed_data():
-    from app.database import SessionLocal
-    from app.models import ImportOperation
-
-    db = SessionLocal()
-    try:
-        count = db.query(ImportOperation).count()
-        if count == 0 and SEED_CSV.exists():
-            run_etl(db, [CsvImportConnector(SEED_CSV)])
-            detect_variations(db)
-    finally:
-        db.close()
 
 
 app = create_app()

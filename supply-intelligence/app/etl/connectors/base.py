@@ -11,22 +11,23 @@ class RawImportRecord:
     operation_date: date
     importer_name: str
     importer_tax_id: str | None
-    supplier_name: str
-    supplier_country: str
+    supplier_name: str | None
+    supplier_country: str | None
     product_name: str
     product_category: str
     hs_code: str
     origin_country: str
     destination_country: str
-    quantity: float
-    unit: str
-    fob_value_usd: float
-    freight_usd: float
-    insurance_usd: float
-    tariff_rate: float
-    additional_tax_rate: float
+    quantity: float | None
+    unit: str | None
+    declared_value_usd: float | None
+    fob_value_usd: float | None
+    freight_usd: float | None
+    insurance_usd: float | None
+    tariff_rate: float | None
+    additional_tax_rate: float | None
     entry_port: str | None
-    transport_mode: str
+    transport_mode: str | None
     description_raw: str | None
 
 

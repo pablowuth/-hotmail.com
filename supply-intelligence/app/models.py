@@ -8,7 +8,6 @@ from sqlalchemy import (
     Enum,
     Float,
     ForeignKey,
-    Integer,
     String,
     Text,
     UniqueConstraint,
@@ -43,9 +42,10 @@ class Importer(Base):
     __tablename__ = "importers"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    legal_name: Mapped[str] = mapped_column(String(255), unique=True, index=True)
-    tax_id: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    legal_name: Mapped[str] = mapped_column(String(255), index=True)
+    tax_id: Mapped[str | None] = mapped_column(String(32), nullable=True, index=True)
     country_code: Mapped[str] = mapped_column(String(2), default="UY")
+    __table_args__ = (UniqueConstraint("legal_name", "tax_id", name="uq_importer_name_rut"),)
 
     operations: Mapped[list["ImportOperation"]] = relationship(back_populates="importer")
 
@@ -55,7 +55,7 @@ class Supplier(Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     name: Mapped[str] = mapped_column(String(255), index=True)
-    country_code: Mapped[str] = mapped_column(String(2))
+    country_code: Mapped[str] = mapped_column(String(2), default="—")
     __table_args__ = (UniqueConstraint("name", "country_code", name="uq_supplier_name_country"),)
 
     operations: Mapped[list["ImportOperation"]] = relationship(back_populates="supplier")
@@ -67,8 +67,8 @@ class Product(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     canonical_name: Mapped[str] = mapped_column(String(255), index=True)
     category: Mapped[ProductCategory] = mapped_column(Enum(ProductCategory), index=True)
-    hs_code: Mapped[str] = mapped_column(String(12))
-    unit: Mapped[str] = mapped_column(String(16), default="u")
+    hs_code: Mapped[str | None] = mapped_column(String(12), nullable=True)
+    unit: Mapped[str | None] = mapped_column(String(16), nullable=True)
 
     operations: Mapped[list["ImportOperation"]] = relationship(back_populates="product")
 
@@ -77,37 +77,41 @@ class ImportOperation(Base):
     __tablename__ = "import_operations"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    source_id: Mapped[str] = mapped_column(String(64), index=True)
-    source_name: Mapped[str] = mapped_column(String(64), default="csv_seed")
+    source_id: Mapped[str] = mapped_column(String(96), index=True)
+    source_name: Mapped[str] = mapped_column(String(64), index=True)
     operation_date: Mapped[date] = mapped_column(Date, index=True)
 
     importer_id: Mapped[str] = mapped_column(ForeignKey("importers.id"), index=True)
-    supplier_id: Mapped[str] = mapped_column(ForeignKey("suppliers.id"), index=True)
+    supplier_id: Mapped[str | None] = mapped_column(ForeignKey("suppliers.id"), nullable=True, index=True)
     product_id: Mapped[str] = mapped_column(ForeignKey("products.id"), index=True)
 
-    origin_country_code: Mapped[str] = mapped_column(String(2))
+    origin_country: Mapped[str | None] = mapped_column(String(64), nullable=True)
     destination_country_code: Mapped[str] = mapped_column(String(2), default="UY")
-    quantity: Mapped[float] = mapped_column(Float)
-    unit: Mapped[str] = mapped_column(String(16))
+    quantity: Mapped[float | None] = mapped_column(Float, nullable=True)
+    unit: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    weight_kg: Mapped[float | None] = mapped_column(Float, nullable=True)
 
-    fob_value_usd: Mapped[float] = mapped_column(Float)
-    freight_usd: Mapped[float] = mapped_column(Float)
-    insurance_usd: Mapped[float] = mapped_column(Float, default=0.0)
-    tariff_rate: Mapped[float] = mapped_column(Float)
-    tariff_usd: Mapped[float] = mapped_column(Float)
-    additional_taxes_usd: Mapped[float] = mapped_column(Float)
-    cif_usd: Mapped[float] = mapped_column(Float)
-    landed_cost_total_usd: Mapped[float] = mapped_column(Float)
-    landed_cost_per_unit_usd: Mapped[float] = mapped_column(Float)
+    declared_value_usd: Mapped[float | None] = mapped_column(Float, nullable=True)
+    fob_value_usd: Mapped[float | None] = mapped_column(Float, nullable=True)
+    freight_usd: Mapped[float | None] = mapped_column(Float, nullable=True)
+    insurance_usd: Mapped[float | None] = mapped_column(Float, nullable=True)
+    tariff_rate: Mapped[float | None] = mapped_column(Float, nullable=True)
+    tariff_usd: Mapped[float | None] = mapped_column(Float, nullable=True)
+    additional_taxes_usd: Mapped[float | None] = mapped_column(Float, nullable=True)
+    cif_usd: Mapped[float | None] = mapped_column(Float, nullable=True)
+    landed_cost_total_usd: Mapped[float | None] = mapped_column(Float, nullable=True)
+    landed_cost_per_unit_usd: Mapped[float | None] = mapped_column(Float, nullable=True)
+    usd_per_kg: Mapped[float | None] = mapped_column(Float, nullable=True)
 
-    entry_port: Mapped[str | None] = mapped_column(String(64), nullable=True)
-    transport_mode: Mapped[str] = mapped_column(String(16), default="sea")
+    customs_office: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    transport_mode: Mapped[str | None] = mapped_column(String(16), nullable=True)
     description_raw: Mapped[str | None] = mapped_column(Text, nullable=True)
+    hs_code_raw: Mapped[str | None] = mapped_column(String(16), nullable=True)
 
     ingested_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     importer: Mapped[Importer] = relationship(back_populates="operations")
-    supplier: Mapped[Supplier] = relationship(back_populates="operations")
+    supplier: Mapped[Supplier | None] = relationship(back_populates="operations")
     product: Mapped[Product] = relationship(back_populates="operations")
 
     __table_args__ = (UniqueConstraint("source_id", "source_name", name="uq_operation_source"),)

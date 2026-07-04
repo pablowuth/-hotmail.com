@@ -151,6 +151,35 @@ tr:hover td { background: rgba(59, 158, 255, 0.05); }
 
 .empty { color: var(--muted); font-size: 0.9rem; padding: 1rem 0; }
 
+.notice {
+  margin: 0 2rem 1rem;
+  padding: 0.75rem 1rem;
+  background: #1a2a3d;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+.notice .muted { color: var(--muted); margin-top: 0.25rem; }
+
+.coverage-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.cov-item {
+  background: var(--surface-2);
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+}
+.cov-label { font-size: 0.75rem; color: var(--muted); text-transform: capitalize; }
+.cov-val.low { color: var(--warn); }
+.meta-notes { font-size: 0.8rem; color: var(--muted); margin: 0; padding-left: 1.2rem; }
+
+td.na { color: var(--muted); opacity: 0.65; }
+
 footer {
   text-align: center;
   padding: 1rem;

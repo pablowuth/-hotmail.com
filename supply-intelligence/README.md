@@ -1,55 +1,61 @@
-# Supply Intelligence — Importaciones Construcción
+# Supply Intelligence — Importaciones Construcción Uruguay
 
-Dashboard de importaciones de productos de construcción con cálculo de costo desaduanizado, detección de variaciones y alertas.
+Dashboard de importaciones de productos de construcción en Uruguay. Muestra **quién importa**, **volumen (kg)**, **precio proxy (USD/kg)** y **origen**, usando solo datos públicos reales. Los campos que la fuente no publica (proveedor, FOB, flete, aranceles, costo desaduanizado) se dejan vacíos.
 
-## Productos cubiertos
+## Fuente principal
 
-Madera, WPC, cielorraso PVC, placas simil mármol, piedra flexible, perfiles para yeso, pisos SPC, OSB, fenólicos, MDF, puertas semi blindada.
+| Fuente | URL | Campos disponibles |
+|--------|-----|-------------------|
+| **datospublicos.uy** (DNA Uruguay) | https://datospublicos.uy/tabla/aduanas_operaciones | Importador, RUT, fecha, valor USD declarado, kg, país origen, producto/NCM, aduana |
+| CSV completo DNA | Requiere plan Pro en datospublicos.uy | — |
 
-## Fuentes de datos
+## Productos filtrados
 
-| Conector | Descripción |
-|----------|-------------|
-| `CsvImportConnector` | Archivo CSV normalizado (`data/seed/importaciones_construccion.csv`) |
-| `MockTradeApiConnector` | Simula API comercial (Volza/Panjiva/aduanas) — interfaz lista para producción |
+Madera, WPC, cielorraso PVC, placas simil mármol, piedra flexible, perfiles para yeso, pisos SPC, OSB, fenólicos, MDF, puertas semi blindada (filtro por NCM y palabras clave).
 
-## Cálculo de costo desaduanizado
-
-```
-CIF = FOB + flete + seguro
-Arancel = CIF × tasa arancelaria
-Tasas adicionales = (CIF + arancel) × tasa (IVA/estadística)
-Costo total = CIF + arancel + tasas
-Costo/unidad = total ÷ cantidad
-```
-
-## Instalación y ejecución
+## Instalación
 
 ```bash
 cd supply-intelligence
-python3 -m venv .venv
-source .venv/bin/activate
 pip install -r requirements.txt
-python scripts/generate_seed.py
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 Abrir http://localhost:8000
 
+Al iniciar, si la base está vacía, carga `data/raw/datospublicos_snapshot.json` (operaciones reales ya descargadas).
+
+## Sincronizar más datos
+
+```bash
+# Descargar snapshot ampliado desde datospublicos.uy (lento, ~30s por importador)
+python scripts/fetch_datospublicos_snapshot.py
+
+# O desde el dashboard: botón "Sincronizar DNA"
+# O vía API:
+curl -X POST "http://localhost:8000/api/ingest?max_pages=20"
+```
+
 ## API
 
 | Endpoint | Descripción |
 |----------|-------------|
-| `GET /api/summary?product=` | KPIs del dashboard |
+| `GET /api/meta` | Fuentes y cobertura de campos |
+| `GET /api/summary?product=` | KPIs |
 | `GET /api/trends?product=&months=12` | Series temporales |
-| `GET /api/importers?product=` | Ranking de importadores |
-| `GET /api/operations?product=` | Últimas operaciones con desglose de costos |
-| `GET /api/alerts?product=` | Alertas de variación de costo, proveedor y volumen |
-| `GET /api/categories` | Categorías disponibles |
-| `POST /api/ingest` | Sincronizar conectores y recalcular alertas |
+| `GET /api/importers?product=` | Ranking importadores |
+| `GET /api/operations?product=` | Operaciones con campos vacíos donde no hay dato |
+| `GET /api/alerts?product=` | Alertas de variación |
+| `POST /api/ingest` | Sincronizar datospublicos.uy |
 
-## Alertas detectadas
+## Cobertura honesta de datos
 
-- Variación de costo desaduanizado (>12% entre períodos de 30 días)
-- Cambio de proveedor principal por producto
-- Variación de volumen por importador (>25%)
+| Campo | Fuente gratuita |
+|-------|-----------------|
+| Importador, RUT | Sí |
+| Valor USD declarado, kg | Sí |
+| Origen, NCM, aduana | Sí |
+| USD/kg (calculado) | Sí, si hay USD y kg |
+| Proveedor extranjero | No |
+| FOB, flete, aranceles | No |
+| Costo desaduanizado | No (sin FOB/flete/aranceles) |
