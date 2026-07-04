@@ -7,6 +7,7 @@
 
 **Documentos relacionados:**
 - `docs/FOUNDATIONAL_PRINCIPLES.md` — Constitución del proyecto
+- `docs/business-brain-modelo-de-razonamiento.md` — **Modelo de razonamiento estratégico** (referencia cognitiva definitiva)
 - `docs/mercadeo-ia-master-blueprint.md` — Arquitectura general (Sección V.8)
 
 ---
