@@ -1,0 +1,41 @@
+{
+  "host": "127.0.0.1",
+  "port": 8787,
+  "recoveryToken": "nexus-recovery-dev-token",
+  "dataDir": "./data",
+  "worker": {
+    "pollIntervalMs": 200,
+    "maxConcurrent": 2,
+    "waitingExecutorTimeoutMs": 5000,
+    "taskHardTimeoutMs": 120000
+  },
+  "executors": {
+    "cursorAgent": {
+      "id": "executor.cursor-agent",
+      "priority": 10,
+      "enabled": true,
+      "healthTimeoutMs": 3000
+    },
+    "localShell": {
+      "id": "executor.local-shell",
+      "priority": 50,
+      "enabled": true,
+      "healthTimeoutMs": 1000
+    },
+    "bootstrap": {
+      "id": "executor.bootstrap",
+      "priority": 100,
+      "enabled": true,
+      "healthTimeoutMs": 500,
+      "operationTimeoutMs": 15000
+    }
+  },
+  "cursorAgent": {
+    "disableEnv": "NEXUS_DISABLE_CURSOR_AGENT",
+    "windowsSearchRoots": [
+      "%LOCALAPPDATA%\\cursor-agent",
+      "%LOCALAPPDATA%\\Programs\\cursor-agent",
+      "%USERPROFILE%\\.cursor-agent"
+    ]
+  }
+}

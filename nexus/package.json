@@ -1,0 +1,19 @@
+{
+  "name": "nexus-control-plane",
+  "version": "2.0.0",
+  "description": "Nexus execution control plane with async prompts, executor failover, and bootstrap recovery",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "node --test tests/**/*.test.js",
+    "test:e2e": "node tests/e2e/run-e2e.js",
+    "preflight": "node scripts/preflight.js",
+    "recover": "node scripts/recover-waiting.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "UNLICENSED"
+}
