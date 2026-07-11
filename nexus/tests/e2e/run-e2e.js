@@ -29,7 +29,7 @@ async function main() {
     process.env.NEXUS_E2E_WORKSPACE,
     'C:\\\\Users\\\\Diva\\\\Desktop\\\\mercadeoia',
     '/mnt/c/Users/Diva/Desktop/mercadeoia',
-    resolveFromRoot('..', 'mercadeoia'),
+    resolveFromRoot('workspaces', 'mercadeoia'),
   ].filter(Boolean);
 
   let workspace = candidates.find((p) => {

@@ -3,7 +3,7 @@
   "port": 8787,
   "profile": "cloud",
   "workspace": {
-    "defaultPath": "../workspaces/mercadeoia"
+    "defaultPath": "./workspaces/mercadeoia"
   },
   "executors": {
     "cursorAgent": {

@@ -29,7 +29,11 @@ export function loadConfig(overrides = {}) {
 
   const envOverrides = {
     host: process.env.NEXUS_HOST,
-    port: process.env.NEXUS_PORT ? Number(process.env.NEXUS_PORT) : undefined,
+    port: process.env.PORT
+      ? Number(process.env.PORT)
+      : process.env.NEXUS_PORT
+        ? Number(process.env.NEXUS_PORT)
+        : undefined,
     recoveryToken: process.env.NEXUS_RECOVERY_TOKEN,
     dataDir: process.env.NEXUS_DATA_DIR,
   };
