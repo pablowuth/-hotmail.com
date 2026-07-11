@@ -5,15 +5,15 @@ services:
     plan: free
     rootDir: nexus
     buildCommand: ""
-    startCommand: NEXUS_PROFILE=cloud NEXUS_HOST=0.0.0.0 node src/index.js
+    startCommand: NEXUS_PROFILE=cloud NEXUS_BRIDGE_PUBLIC=1 NEXUS_HOST=0.0.0.0 node src/index.js
     healthCheckPath: /v1/health
     envVars:
       - key: NEXUS_PROFILE
         value: cloud
+      - key: NEXUS_BRIDGE_PUBLIC
+        value: "1"
       - key: NEXUS_HOST
         value: 0.0.0.0
       - key: NEXUS_RECOVERY_TOKEN
-        generateValue: true
-      - key: NEXUS_API_KEY
         generateValue: true
     autoDeploy: true

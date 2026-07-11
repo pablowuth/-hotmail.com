@@ -72,6 +72,14 @@ export async function createRuntime(overrides = {}) {
 
   const openapiPath = resolveFromRoot('openapi.json');
   runtime.openapi = JSON.parse(fs.readFileSync(openapiPath, 'utf8'));
+  const publicUrl = process.env.NEXUS_PUBLIC_URL || config.publicUrl || null;
+  if (publicUrl) {
+    runtime.publicUrl = publicUrl.replace(/\/$/, '');
+    runtime.openapi = {
+      ...runtime.openapi,
+      servers: [{ url: runtime.publicUrl, description: 'Nexus public bridge' }],
+    };
+  }
 
   await providers.syncFromExecutors();
 

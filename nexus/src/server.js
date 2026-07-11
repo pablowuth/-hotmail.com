@@ -25,6 +25,10 @@ async function handleRequest(runtime, req, res) {
   const { pathname } = url;
   const method = (req.method || 'GET').toUpperCase();
 
+  if (method === 'OPTIONS') {
+    return sendJson(res, 204, {});
+  }
+
   if (method === 'GET' && pathname === '/health') {
     return sendJson(res, 200, await buildHealth(runtime));
   }
@@ -41,7 +45,7 @@ async function handleRequest(runtime, req, res) {
     return handleRecovery(runtime, req, res);
   }
 
-  assertApiKey(req, runtime.config);
+  assertApiKey(req, runtime.config, pathname, method);
 
   if (method === 'GET' && pathname === '/v1/capabilities') {
     return sendJson(res, 200, { capabilities: runtime.providers.listCapabilities() });
@@ -173,8 +177,10 @@ async function buildHealth(runtime) {
     sovereign_ok: sovereignOk,
     intent_ok: intentOk,
     effect_ok: effectOk,
+    bridge_public: runtime.config.bridge?.public === true || process.env.NEXUS_BRIDGE_PUBLIC === '1',
+    public_url: runtime.publicUrl || null,
     service: 'nexus-control-plane',
-    version: '0.3.1-phase-a-prime',
+    version: '0.3.1-chatgpt-bridge',
     workerRunning: runtime.worker.isRunning(),
     tasks: { queued, waitingExecutor: waiting, running },
     executors: summary.executors,
@@ -236,11 +242,17 @@ function readJson(req) {
 }
 
 function sendJson(res, status, body) {
-  const payload = JSON.stringify(body);
-  res.writeHead(status, {
+  const payload = body === undefined || body === null ? '' : JSON.stringify(body);
+  const headers = {
     'content-type': 'application/json; charset=utf-8',
-    'content-length': Buffer.byteLength(payload),
     'cache-control': 'no-store',
-  });
+    'access-control-allow-origin': '*',
+    'access-control-allow-methods': 'GET, POST, OPTIONS',
+    'access-control-allow-headers': 'Content-Type, Authorization, X-Nexus-Api-Key, X-Nexus-Recovery-Token',
+  };
+  if (payload) {
+    headers['content-length'] = Buffer.byteLength(payload);
+  }
+  res.writeHead(status, headers);
   res.end(payload);
 }

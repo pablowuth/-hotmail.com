@@ -2,8 +2,8 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Nexus Control Plane API",
-    "version": "2.1.0",
-    "description": "Async task control plane (Phase A') with skills-first provider registry, SQLite ledger, executor failover, and bootstrap recovery. POST /v1/prompt always returns HTTP 202 immediately."
+    "version": "2.2.0",
+    "description": "Puente ChatGPT ↔ Nexus ↔ Cursor. POST /v1/prompt returns HTTP 202 immediately; poll GET /v1/tasks/{taskId} for results."
   },
   "servers": [
     {
@@ -79,7 +79,6 @@
         "summary": "Enqueue a prompt for asynchronous execution",
         "description": "Returns HTTP 202 immediately with taskId and status QUEUED. The HTTP request never waits for Cursor or any executor.",
         "operationId": "enqueuePrompt",
-        "security": [{ "ApiKeyAuth": [] }],
         "requestBody": {
           "required": true,
           "content": {
