@@ -1,0 +1,23 @@
+{
+  "name": "nexus-control-plane",
+  "version": "2.1.0",
+  "description": "Nexus Apollo-13 autonomous control plane — works without operator PC or Cursor Agent",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node scripts/apollo13-start.js",
+    "start:raw": "node src/index.js",
+    "dev": "node --watch scripts/apollo13-start.js",
+    "test": "node --test tests/**/*.test.js",
+    "test:e2e": "node tests/e2e/run-e2e.js",
+    "preflight": "node scripts/preflight.js",
+    "recover": "node scripts/recover-waiting.js",
+    "provision": "node scripts/provision-mercadeoia.js",
+    "apollo13": "node scripts/apollo13-start.js",
+    "apollo13:verify": "node scripts/apollo13-live-verify.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "UNLICENSED"
+}

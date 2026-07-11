@@ -1,0 +1,50 @@
+{
+  "host": "0.0.0.0",
+  "port": 8787,
+  "mode": "apollo13",
+  "recoveryToken": "nexus-recovery-dev-token",
+  "dataDir": "./data",
+  "defaultWorkspace": "./workspaces/mercadeoia",
+  "worker": {
+    "pollIntervalMs": 150,
+    "maxConcurrent": 4,
+    "waitingExecutorTimeoutMs": 1500,
+    "taskHardTimeoutMs": 120000
+  },
+  "executors": {
+    "cursorAgent": {
+      "id": "executor.cursor-agent",
+      "priority": 90,
+      "enabled": true,
+      "optional": true,
+      "healthTimeoutMs": 1500
+    },
+    "localShell": {
+      "id": "executor.local-shell",
+      "priority": 10,
+      "enabled": true,
+      "healthTimeoutMs": 1000
+    },
+    "bootstrap": {
+      "id": "executor.bootstrap",
+      "priority": 20,
+      "enabled": true,
+      "healthTimeoutMs": 500,
+      "operationTimeoutMs": 15000
+    }
+  },
+  "cursorAgent": {
+    "disableEnv": "NEXUS_DISABLE_CURSOR_AGENT",
+    "windowsSearchRoots": [
+      "%LOCALAPPDATA%\\cursor-agent",
+      "%LOCALAPPDATA%\\Programs\\cursor-agent",
+      "%USERPROFILE%\\.cursor-agent"
+    ]
+  },
+  "apollo13": {
+    "description": "Operate fully without the operator PC or Cursor Agent",
+    "autoDisableUnhealthyCursor": true,
+    "preferLocalShell": true,
+    "bindAllInterfaces": true
+  }
+}
