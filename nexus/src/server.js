@@ -85,11 +85,15 @@ async function handlePrompt(runtime, req, res) {
     });
   }
 
-  // CRITICAL: respond immediately with 202. Never wait for Cursor / executors.
+  // CRITICAL: respond immediately with 202. Never wait for Cursor / executors / PC.
+  const workspace = body.workspace || body.cwd || runtime.config.defaultWorkspace || null;
   const task = runtime.taskStore.create({
     prompt,
-    workspace: body.workspace || body.cwd || null,
-    metadata: body.metadata || {},
+    workspace,
+    metadata: {
+      ...(body.metadata || {}),
+      mode: runtime.mode || runtime.config.mode || 'apollo13',
+    },
   });
 
   sendJson(res, 202, {
@@ -128,10 +132,20 @@ async function buildHealth(runtime) {
   const waiting = runtime.taskStore.listByStatus(TaskStatus.WAITING_EXECUTOR).length;
   const queued = runtime.taskStore.listByStatus(TaskStatus.QUEUED).length;
   const running = runtime.taskStore.listByStatus(TaskStatus.RUNNING).length;
-  const healthyExecutors = Object.values(health).filter((h) => h.ok).length;
+  const enabled = runtime.registry.list().filter((e) => e.enabled);
+  const healthyEnabled = enabled.filter((e) => health[e.id]?.ok).length;
+  const cursor = runtime.registry.get('executor.cursor-agent');
   return {
-    ok: healthyExecutors > 0 && runtime.worker.isRunning(),
+    ok: healthyEnabled > 0 && runtime.worker.isRunning(),
     service: 'nexus-control-plane',
+    mode: runtime.mode || runtime.config.mode || 'apollo13',
+    apollo13: {
+      autonomous: true,
+      requiresOperatorPc: false,
+      requiresCursorAgent: false,
+      cursorEnabled: Boolean(cursor?.enabled),
+      defaultWorkspace: runtime.config.defaultWorkspace || null,
+    },
     workerRunning: runtime.worker.isRunning(),
     tasks: { queued, waitingExecutor: waiting, running },
     executors: runtime.registry.snapshot(),

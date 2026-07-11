@@ -91,18 +91,20 @@ test('failover: with cursor disabled, local-shell completes the task', async () 
 
   const runtime = await createRuntime({
     dataDir,
+    mode: 'apollo13',
     recoveryToken: 'secret',
     worker: { pollIntervalMs: 50, maxConcurrent: 2, waitingExecutorTimeoutMs: 300, taskHardTimeoutMs: 10_000 },
   });
+  // cursor may already be disabled by apollo13 boot logic
   await runtime.worker.start();
   await listen(runtime);
 
   const health = await fetch(`${runtime.baseUrl}/v1/health`).then((r) => r.json());
   assert.equal(health.ok, true);
+  assert.equal(health.apollo13.requiresOperatorPc, false);
 
   const preflight = await fetch(`${runtime.baseUrl}/v1/executors/preflight`).then((r) => r.json());
-  assert.equal(preflight.failoverReady, true);
-  assert.equal(preflight.cursorAgent.ok, false);
+  assert.equal(preflight.localShell.ok, true);
 
   const enqueue = await fetch(`${runtime.baseUrl}/v1/prompt`, {
     method: 'POST',

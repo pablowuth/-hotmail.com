@@ -1,52 +1,28 @@
-# Nexus Control Plane
+# Nexus Control Plane — Apollo-13
 
-Async execution control plane that **does not block HTTP on Cursor Agent**.
+Autonomous execution control plane. **Does not require the operator PC or Cursor Agent.**
 
-## Root cause addressed
+## Mode: `apollo13`
 
-- Hardcoded broken Windows path to a specific `cursor-agent` version `node.exe`
-- `/v1/prompt` waiting on executor completion (Cloudflare 524 risk)
-- Tasks stuck forever in `WAITING_EXECUTOR` when `executor.cursor-agent` was unavailable
+- `POST /v1/prompt` → HTTP **202** + `QUEUED` immediately (no Cloudflare 524)
+- WORK runs on `executor.local-shell` inside this environment
+- `executor.cursor-agent` is optional and auto-disabled when unavailable
+- `executor.bootstrap` handles recovery without Cursor
+- Default workspace: `workspaces/mercadeoia` (provisioned from repo branches)
 
-## Architecture
-
-```
-Client → POST /v1/prompt → 202 QUEUED (immediate)
-                ↓
-         TaskStore (durable)
-                ↓
-         TaskWorker (background)
-                ↓
-     ExecutorRegistry (priority + health)
-        ├─ executor.cursor-agent (preferred, optional)
-        ├─ executor.local-shell  (failover)
-        └─ executor.bootstrap    (repair-only whitelist)
-```
-
-## Quick start
+## Start (no PC needed)
 
 ```bash
 cd nexus
-npm start
+npm run provision
+npm run apollo13
+# verify against live server:
+npm run apollo13:verify
 ```
 
-## Key endpoints
-
-| Method | Path | Behavior |
-|--------|------|----------|
-| POST | `/v1/prompt` | Always HTTP **202** + `taskId` + `QUEUED` |
-| GET | `/v1/tasks/{id}` | Poll task status |
-| GET | `/v1/health` | Control plane + executor health |
-| GET | `/v1/executors/preflight` | Executor preflight / failover readiness |
-| POST | `/v1/recovery` | Whitelisted repair actions (token required) |
-
-Recovery token: header `X-Nexus-Recovery-Token` (default in `config/default.json`, override with `NEXUS_RECOVERY_TOKEN`).
-
-## Disable Cursor Agent (failover test)
-
-```bash
-NEXUS_DISABLE_CURSOR_AGENT=1 npm start
-```
+Health: `GET http://127.0.0.1:8787/v1/health`  
+Prompt: `POST http://127.0.0.1:8787/v1/prompt`  
+Recovery: `POST http://127.0.0.1:8787/v1/recovery` with `X-Nexus-Recovery-Token`
 
 ## Tests
 

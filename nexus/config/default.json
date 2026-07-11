@@ -1,30 +1,33 @@
 {
-  "host": "127.0.0.1",
+  "host": "0.0.0.0",
   "port": 8787,
+  "mode": "apollo13",
   "recoveryToken": "nexus-recovery-dev-token",
   "dataDir": "./data",
+  "defaultWorkspace": "./workspaces/mercadeoia",
   "worker": {
-    "pollIntervalMs": 200,
-    "maxConcurrent": 2,
-    "waitingExecutorTimeoutMs": 5000,
+    "pollIntervalMs": 150,
+    "maxConcurrent": 4,
+    "waitingExecutorTimeoutMs": 1500,
     "taskHardTimeoutMs": 120000
   },
   "executors": {
     "cursorAgent": {
       "id": "executor.cursor-agent",
-      "priority": 10,
+      "priority": 90,
       "enabled": true,
-      "healthTimeoutMs": 3000
+      "optional": true,
+      "healthTimeoutMs": 1500
     },
     "localShell": {
       "id": "executor.local-shell",
-      "priority": 50,
+      "priority": 10,
       "enabled": true,
       "healthTimeoutMs": 1000
     },
     "bootstrap": {
       "id": "executor.bootstrap",
-      "priority": 100,
+      "priority": 20,
       "enabled": true,
       "healthTimeoutMs": 500,
       "operationTimeoutMs": 15000
@@ -37,5 +40,11 @@
       "%LOCALAPPDATA%\\Programs\\cursor-agent",
       "%USERPROFILE%\\.cursor-agent"
     ]
+  },
+  "apollo13": {
+    "description": "Operate fully without the operator PC or Cursor Agent",
+    "autoDisableUnhealthyCursor": true,
+    "preferLocalShell": true,
+    "bindAllInterfaces": true
   }
 }

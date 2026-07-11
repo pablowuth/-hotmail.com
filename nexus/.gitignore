@@ -3,3 +3,5 @@ data/
 .nexus/
 node_modules/
 .DS_Store
+*.pid
+workspaces/mercadeoia/.nexus/

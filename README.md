@@ -1,12 +1,11 @@
-# Nexus Control Plane
+# Nexus Apollo-13 (autonomous)
 
-This repository hosts the **Nexus execution control plane** under [`nexus/`](./nexus).
+Nexus control plane under [`nexus/`](./nexus). Runs **without the operator PC and without Cursor Agent**.
 
 ```bash
 cd nexus
-npm start
-npm test
-npm run test:e2e
+npm run apollo13          # start autonomous control plane on :8787
+npm run apollo13:verify   # live health + mercadeoia task + failover check
 ```
 
-See [`nexus/README.md`](./nexus/README.md) for architecture, recovery API, and failover notes.
+See [`nexus/README.md`](./nexus/README.md).

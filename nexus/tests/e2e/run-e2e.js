@@ -27,6 +27,7 @@ async function main() {
   // Prefer real mercadeoia path if present (Windows host / mounted), else simulate
   const candidates = [
     process.env.NEXUS_E2E_WORKSPACE,
+    resolveFromRoot('workspaces', 'mercadeoia'),
     'C:\\\\Users\\\\Diva\\\\Desktop\\\\mercadeoia',
     '/mnt/c/Users/Diva/Desktop/mercadeoia',
     resolveFromRoot('..', 'mercadeoia'),
