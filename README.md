@@ -1,9 +1,10 @@
 # Nexus
 
-Arquitectura de runtime autorreparable para orquestar agentes e intents sobre proyectos (p.ej. Mercadeo IA).
+Runtime soberano de intents: Control Plane independiente de executors, ledger durable, failover por capacidades, Recovery Mode administrable.
 
 ## Documentación
 
 | Documento | Descripción |
 |-----------|-------------|
-| [nexus-sovereign-reflex-architecture.md](docs/nexus-sovereign-reflex-architecture.md) | **Sovereign Reflex v0.1** — rediseño del plano de ejecución (sin SPOF de executor) |
+| [nexus-sovereign-reflex-architecture-v0.2.md](docs/nexus-sovereign-reflex-architecture-v0.2.md) | **Arquitectura cerrada v0.2** — decisiones, contratos, modelo de datos, fases |
+| [nexus-sovereign-reflex-architecture.md](docs/nexus-sovereign-reflex-architecture.md) | v0.1 (histórico — preguntas abiertas) |
