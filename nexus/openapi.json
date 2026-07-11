@@ -79,6 +79,7 @@
         "summary": "Enqueue a prompt for asynchronous execution",
         "description": "Returns HTTP 202 immediately with taskId and status QUEUED. The HTTP request never waits for Cursor or any executor.",
         "operationId": "enqueuePrompt",
+        "security": [{ "ApiKeyAuth": [] }],
         "requestBody": {
           "required": true,
           "content": {
@@ -232,6 +233,11 @@
   },
   "components": {
     "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "NEXUS_API_KEY via Authorization: Bearer <key>"
+      },
       "RecoveryToken": {
         "type": "apiKey",
         "in": "header",

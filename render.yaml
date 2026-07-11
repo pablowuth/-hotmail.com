@@ -14,4 +14,6 @@ services:
         value: 0.0.0.0
       - key: NEXUS_RECOVERY_TOKEN
         generateValue: true
+      - key: NEXUS_API_KEY
+        generateValue: true
     autoDeploy: true

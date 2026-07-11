@@ -3,32 +3,30 @@
   "info": {
     "title": "Nexus Control Plane",
     "version": "2.1.0",
-    "description": "API async de Nexus para ChatGPT. POST /v1/prompt devuelve 202; consultar estado con GET /v1/tasks/{taskId}."
+    "description": "API async de Nexus para ChatGPT. Requiere API key. POST /v1/prompt devuelve 202; consultar estado con GET /v1/tasks/{taskId}."
   },
   "servers": [
     {
       "url": "https://nexus-control-plane.onrender.com",
       "description": "Render free (permanente tras deploy)"
-    },
-    {
-      "url": "https://cult-criticism-sublime-corn.trycloudflare.com",
-      "description": "Túnel cloud temporal (activo mientras corre el agente)"
     }
   ],
-  "paths": {
-    "/v1/health": {
-      "get": {
-        "operationId": "getHealth",
-        "summary": "Estado del control plane",
-        "responses": {
-          "200": { "description": "OK" }
-        }
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "NEXUS_API_KEY — configurar en ChatGPT Actions como API Key / Bearer"
       }
-    },
+    }
+  },
+  "security": [{ "ApiKeyAuth": [] }],
+  "paths": {
     "/v1/prompt": {
       "post": {
         "operationId": "enqueuePrompt",
         "summary": "Encolar un prompt (respuesta inmediata 202)",
+        "security": [{ "ApiKeyAuth": [] }],
         "requestBody": {
           "required": true,
           "content": {
@@ -46,20 +44,8 @@
           }
         },
         "responses": {
-          "202": {
-            "description": "Tarea encolada",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "taskId": { "type": "string" },
-                    "status": { "type": "string", "enum": ["QUEUED"] }
-                  }
-                }
-              }
-            }
-          }
+          "202": { "description": "Tarea encolada" },
+          "401": { "description": "API key inválida o faltante" }
         }
       }
     },
@@ -67,6 +53,7 @@
       "get": {
         "operationId": "getTask",
         "summary": "Consultar estado de una tarea",
+        "security": [{ "ApiKeyAuth": [] }],
         "parameters": [
           {
             "name": "taskId",
@@ -77,6 +64,7 @@
         ],
         "responses": {
           "200": { "description": "Tarea y eventos" },
+          "401": { "description": "API key inválida o faltante" },
           "404": { "description": "No encontrada" }
         }
       }

@@ -1,6 +1,7 @@
 import http from 'node:http';
 import { URL } from 'node:url';
 import { TaskStatus } from './control-plane/states.js';
+import { assertApiKey } from './auth/api-key.js';
 
 export function createServer(runtime) {
   const server = http.createServer(async (req, res) => {
@@ -31,6 +32,16 @@ async function handleRequest(runtime, req, res) {
   if (method === 'GET' && pathname === '/v1/health') {
     return sendJson(res, 200, await buildHealth(runtime));
   }
+
+  if (method === 'GET' && (pathname === '/openapi.json' || pathname === '/v1/openapi.json')) {
+    return sendJson(res, 200, runtime.openapi);
+  }
+
+  if (method === 'POST' && pathname === '/v1/recovery') {
+    return handleRecovery(runtime, req, res);
+  }
+
+  assertApiKey(req, runtime.config);
 
   if (method === 'GET' && pathname === '/v1/capabilities') {
     return sendJson(res, 200, { capabilities: runtime.providers.listCapabilities() });
@@ -73,14 +84,6 @@ async function handleRequest(runtime, req, res) {
       ? runtime.taskStore.listByStatus(status)
       : runtime.taskStore.list();
     return sendJson(res, 200, { tasks });
-  }
-
-  if (method === 'POST' && pathname === '/v1/recovery') {
-    return handleRecovery(runtime, req, res);
-  }
-
-  if (method === 'GET' && (pathname === '/openapi.json' || pathname === '/v1/openapi.json')) {
-    return sendJson(res, 200, runtime.openapi);
   }
 
   sendJson(res, 404, { error: { code: 'NOT_FOUND', message: `No route ${method} ${pathname}` } });
