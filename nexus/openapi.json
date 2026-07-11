@@ -1,0 +1,242 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Nexus Control Plane API",
+    "version": "2.1.0",
+    "description": "Async task control plane (Phase A') with skills-first provider registry, SQLite ledger, executor failover, and bootstrap recovery. POST /v1/prompt always returns HTTP 202 immediately."
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:8787",
+      "description": "Local control plane"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Liveness/readiness of the control plane",
+        "operationId": "getHealth",
+        "responses": {
+          "200": {
+            "description": "Health snapshot"
+          }
+        }
+      }
+    },
+    "/v1/health": {
+      "get": {
+        "summary": "Control plane health (v1)",
+        "operationId": "getV1Health",
+        "responses": {
+          "200": {
+            "description": "Health snapshot"
+          }
+        }
+      }
+    },
+    "/v1/capabilities": {
+      "get": {
+        "summary": "List canonical capabilities (skills-first contract)",
+        "operationId": "listCapabilities",
+        "responses": {
+          "200": { "description": "Capability catalog" }
+        }
+      }
+    },
+    "/v1/providers": {
+      "get": {
+        "summary": "List providers with health and capabilities",
+        "operationId": "listProviders",
+        "responses": {
+          "200": { "description": "Provider registry snapshot" }
+        }
+      }
+    },
+    "/v1/executors": {
+      "get": {
+        "summary": "List executors and health",
+        "operationId": "listExecutors",
+        "responses": {
+          "200": {
+            "description": "Executor registry snapshot"
+          }
+        }
+      }
+    },
+    "/v1/executors/preflight": {
+      "get": {
+        "summary": "Executor preflight including failover readiness",
+        "operationId": "executorPreflight",
+        "responses": {
+          "200": {
+            "description": "Preflight result"
+          }
+        }
+      }
+    },
+    "/v1/prompt": {
+      "post": {
+        "summary": "Enqueue a prompt for asynchronous execution",
+        "description": "Returns HTTP 202 immediately with taskId and status QUEUED. The HTTP request never waits for Cursor or any executor.",
+        "operationId": "enqueuePrompt",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["prompt"],
+                "properties": {
+                  "prompt": {
+                    "type": "string"
+                  },
+                  "workspace": {
+                    "type": "string",
+                    "description": "Absolute workspace path for the task"
+                  },
+                  "metadata": {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "client": {
+                    "type": "object",
+                    "properties": {
+                      "request_id": {
+                        "type": "string",
+                        "description": "Idempotency key for duplicate prompt submissions"
+                      }
+                    }
+                  },
+                  "requestId": {
+                    "type": "string",
+                    "description": "Alias for client.request_id"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Task accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "taskId": { "type": "string", "format": "uuid" },
+                    "status": { "type": "string", "enum": ["QUEUED"] },
+                    "message": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          }
+        }
+      }
+    },
+    "/v1/tasks": {
+      "get": {
+        "summary": "List tasks",
+        "operationId": "listTasks",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["QUEUED", "WAITING_EXECUTOR", "RUNNING", "SUCCEEDED", "FAILED", "CANCELLED"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task list"
+          }
+        }
+      }
+    },
+    "/v1/tasks/{taskId}": {
+      "get": {
+        "summary": "Get task by id",
+        "operationId": "getTask",
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Task" },
+          "404": { "description": "Not found" }
+        }
+      }
+    },
+    "/v1/recovery": {
+      "post": {
+        "summary": "Run a whitelisted recovery/repair action via executor.bootstrap",
+        "description": "Protected by X-Nexus-Recovery-Token (or Authorization: Bearer). Does not depend on Cursor.",
+        "operationId": "runRecovery",
+        "security": [
+          { "RecoveryToken": [] }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["action"],
+                "properties": {
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "repair-executor",
+                      "register-executor",
+                      "restart-worker",
+                      "requeue-waiting",
+                      "rollback-last-repair"
+                    ]
+                  },
+                  "executorId": { "type": "string" },
+                  "id": { "type": "string" },
+                  "type": { "type": "string" },
+                  "priority": { "type": "number" },
+                  "enabled": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Recovery action result" },
+          "400": { "description": "Invalid action" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/openapi.json": {
+      "get": {
+        "summary": "OpenAPI document",
+        "operationId": "getOpenApi",
+        "responses": {
+          "200": { "description": "OpenAPI JSON" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "RecoveryToken": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Nexus-Recovery-Token"
+      }
+    }
+  }
+}

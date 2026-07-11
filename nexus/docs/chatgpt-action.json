@@ -1,0 +1,85 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Nexus Control Plane",
+    "version": "2.1.0",
+    "description": "API async de Nexus para ChatGPT. POST /v1/prompt devuelve 202; consultar estado con GET /v1/tasks/{taskId}."
+  },
+  "servers": [
+    {
+      "url": "https://nexus-control-plane.onrender.com",
+      "description": "Render free (permanente tras deploy)"
+    },
+    {
+      "url": "https://cult-criticism-sublime-corn.trycloudflare.com",
+      "description": "Túnel cloud temporal (activo mientras corre el agente)"
+    }
+  ],
+  "paths": {
+    "/v1/health": {
+      "get": {
+        "operationId": "getHealth",
+        "summary": "Estado del control plane",
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/v1/prompt": {
+      "post": {
+        "operationId": "enqueuePrompt",
+        "summary": "Encolar un prompt (respuesta inmediata 202)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["prompt"],
+                "properties": {
+                  "prompt": { "type": "string" },
+                  "workspace": { "type": "string" },
+                  "metadata": { "type": "object" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Tarea encolada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "taskId": { "type": "string" },
+                    "status": { "type": "string", "enum": ["QUEUED"] }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/tasks/{taskId}": {
+      "get": {
+        "operationId": "getTask",
+        "summary": "Consultar estado de una tarea",
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Tarea y eventos" },
+          "404": { "description": "No encontrada" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "host": "0.0.0.0",
+  "port": 8787,
+  "profile": "cloud",
+  "workspace": {
+    "defaultPath": "./workspaces/mercadeoia"
+  },
+  "executors": {
+    "cursorAgent": {
+      "enabled": false,
+      "priority": 100
+    },
+    "localShell": {
+      "priority": 10,
+      "enabled": true
+    },
+    "bootstrap": {
+      "priority": 50,
+      "enabled": true
+    }
+  }
+}

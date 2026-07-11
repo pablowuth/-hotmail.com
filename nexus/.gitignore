@@ -1,0 +1,6 @@
+data/
+*.tmp
+.nexus/
+node_modules/
+.DS_Store
+workspaces/**/.nexus/
