@@ -3,3 +3,4 @@ data/
 .nexus/
 node_modules/
 .DS_Store
+workspaces/**/.nexus/

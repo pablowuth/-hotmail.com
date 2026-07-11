@@ -109,7 +109,7 @@ async function handlePrompt(runtime, req, res) {
 
   const task = runtime.taskStore.create({
     prompt,
-    workspace: body.workspace || body.cwd || null,
+    workspace: body.workspace || body.cwd || runtime.config.workspace?.defaultPath || null,
     metadata: body.metadata || {},
     clientRequestId,
   });

@@ -23,7 +23,26 @@ Client → POST /v1/prompt → 202 QUEUED (immediate)
         └─ executor.bootstrap    (repair-only whitelist)
 ```
 
-## Quick start
+## Cloud (sin PC local)
+
+Nexus puede vivir en la nube: el workspace `workspaces/mercadeoia` vive en el repo y el ejecutor principal es `executor.local-shell` (Linux).
+
+```bash
+cd nexus
+NEXUS_PROFILE=cloud npm run start:cloud
+```
+
+Para ChatGPT, desplegá en un host con URL pública HTTPS (Render, Fly, Railway):
+
+1. Conectá el repo a Render y usá `nexus/render.yaml`
+2. Copiá la URL pública (ej. `https://nexus-control-plane.onrender.com`)
+3. En el GPT Action de ChatGPT, apuntá `servers[0].url` a esa URL y subí `openapi.json`
+
+ChatGPT → HTTPS → Nexus cloud → workspace en repo (sin tu PC).
+
+Perfil cloud desactiva `executor.cursor-agent` y usa `local-shell` como primario.
+
+## Quick start (local)
 
 ```bash
 cd nexus
