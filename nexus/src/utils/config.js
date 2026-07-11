@@ -40,6 +40,15 @@ export function loadConfig(overrides = {}) {
   const cleaned = Object.fromEntries(Object.entries(envOverrides).filter(([, v]) => v !== undefined && v !== ''));
   const merged = deepMerge(deepMerge(raw, cleaned), overrides);
 
+  if (process.env.NEXUS_API_KEY) {
+    merged.auth = { ...(merged.auth || {}), apiKey: process.env.NEXUS_API_KEY };
+  }
+  if (process.env.NEXUS_AUTH_REQUIRED === '1') {
+    merged.auth = { ...(merged.auth || {}), required: true };
+  } else if (process.env.NEXUS_AUTH_REQUIRED === '0') {
+    merged.auth = { ...(merged.auth || {}), required: false };
+  }
+
   merged.dataDir = path.isAbsolute(merged.dataDir)
     ? merged.dataDir
     : resolveFromRoot(merged.dataDir);

@@ -2,6 +2,9 @@
   "host": "0.0.0.0",
   "port": 8787,
   "profile": "cloud",
+  "auth": {
+    "required": true
+  },
   "workspace": {
     "defaultPath": "./workspaces/mercadeoia"
   },

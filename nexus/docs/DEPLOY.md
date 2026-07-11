@@ -1,5 +1,17 @@
 # Deploy gratuito en Render
 
+## Autenticación
+
+La API está protegida con **API key** (`NEXUS_API_KEY`):
+
+```
+Authorization: Bearer TU_API_KEY
+```
+
+En ChatGPT Actions → **Authentication** → API Key → Bearer → pegá la key de Render.
+
+Público sin key: solo `/health`, `/v1/health` y `/openapi.json`.
+
 ## URL pública temporal (ya activa)
 
 ```

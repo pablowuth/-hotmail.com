@@ -195,3 +195,36 @@ test('WAITING_EXECUTOR tasks are recovered and not left forever', async () => {
   delete process.env.NEXUS_DISABLE_CURSOR_AGENT;
   delete process.env.NEXUS_WORKER_UNREF;
 });
+
+test('API key: required when configured, blocks unauthorized access', async () => {
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'nexus-auth-'));
+  process.env.NEXUS_API_KEY = 'secret-api-key';
+  process.env.NEXUS_AUTH_REQUIRED = '1';
+
+  const runtime = await createRuntime({ dataDir, port: 0 });
+  await listen(runtime);
+
+  const denied = await fetch(`${runtime.baseUrl}/v1/prompt`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ prompt: 'no auth' }),
+  });
+  assert.equal(denied.status, 401);
+
+  const health = await fetch(`${runtime.baseUrl}/v1/health`);
+  assert.equal(health.status, 200);
+
+  const ok = await fetch(`${runtime.baseUrl}/v1/prompt`, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      authorization: 'Bearer secret-api-key',
+    },
+    body: JSON.stringify({ prompt: 'with auth' }),
+  });
+  assert.equal(ok.status, 202);
+
+  await new Promise((r) => runtime.server.close(() => r()));
+  delete process.env.NEXUS_API_KEY;
+  delete process.env.NEXUS_AUTH_REQUIRED;
+});
