@@ -6,5 +6,6 @@ Runtime soberano de intents: Control Plane independiente de executors, ledger du
 
 | Documento | Descripción |
 |-----------|-------------|
-| [nexus-sovereign-reflex-architecture-v0.2.md](docs/nexus-sovereign-reflex-architecture-v0.2.md) | **Arquitectura cerrada v0.2** — decisiones, contratos, modelo de datos, fases |
-| [nexus-sovereign-reflex-architecture.md](docs/nexus-sovereign-reflex-architecture.md) | v0.1 (histórico — preguntas abiertas) |
+| [NEXUS-ARQUITECTURA-PEGAR.md](docs/NEXUS-ARQUITECTURA-PEGAR.md) | **Documento único para copiar/pegar** (revisión con ChatGPT) |
+| [nexus-sovereign-reflex-architecture-v0.2.md](docs/nexus-sovereign-reflex-architecture-v0.2.md) | Arquitectura cerrada v0.2 (detalle) |
+| [nexus-sovereign-reflex-architecture.md](docs/nexus-sovereign-reflex-architecture.md) | v0.1 (histórico) |
