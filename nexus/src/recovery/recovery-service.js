@@ -1,9 +1,10 @@
 import { BOOTSTRAP_ACTIONS } from '../executors/bootstrap.js';
 
 export class RecoveryService {
-  constructor({ bootstrap, recoveryToken }) {
+  constructor({ bootstrap, recoveryToken, taskStore }) {
     this.bootstrap = bootstrap;
     this.recoveryToken = recoveryToken;
+    this.taskStore = taskStore;
   }
 
   assertToken(provided) {
@@ -32,6 +33,23 @@ export class RecoveryService {
       err.status = 400;
       throw err;
     }
-    return this.bootstrap.runAction(action, params);
+    try {
+      const result = await this.bootstrap.runAction(action, params);
+      this.taskStore?.recordRecovery({
+        action,
+        ok: true,
+        at: new Date().toISOString(),
+        result,
+      });
+      return result;
+    } catch (error) {
+      this.taskStore?.recordRecovery({
+        action,
+        ok: false,
+        at: new Date().toISOString(),
+        error: error.message,
+      });
+      throw error;
+    }
   }
 }

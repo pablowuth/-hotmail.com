@@ -2,44 +2,44 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { TaskStatus } from '../control-plane/states.js';
-
-function ensureDir(dir) {
-  fs.mkdirSync(dir, { recursive: true });
-}
-
-export class JsonStore {
-  constructor(filePath) {
-    this.filePath = filePath;
-    ensureDir(path.dirname(filePath));
-    if (!fs.existsSync(filePath)) {
-      fs.writeFileSync(filePath, '[]\n', 'utf8');
-    }
-  }
-
-  readAll() {
-    const raw = fs.readFileSync(this.filePath, 'utf8').trim();
-    if (!raw) return [];
-    return JSON.parse(raw);
-  }
-
-  writeAll(items) {
-    const tmp = `${this.filePath}.tmp`;
-    fs.writeFileSync(tmp, `${JSON.stringify(items, null, 2)}\n`, 'utf8');
-    fs.renameSync(tmp, this.filePath);
-  }
-}
+import { SqliteLedger } from './sqlite-ledger.js';
 
 export class TaskStore {
   constructor(dataDir) {
-    this.store = new JsonStore(path.join(dataDir, 'tasks.json'));
+    this.dataDir = dataDir;
+    this.ledger = new SqliteLedger(dataDir);
+    this.#migrateLegacyJsonIfNeeded();
+  }
+
+  #migrateLegacyJsonIfNeeded() {
+    const legacyPath = path.join(this.dataDir, 'tasks.json');
+    if (!fs.existsSync(legacyPath)) return;
+    if (this.ledger.listTasks({ limit: 1 }).length > 0) return;
+
+    const raw = JSON.parse(fs.readFileSync(legacyPath, 'utf8'));
+    const tasks = Array.isArray(raw) ? raw : Object.values(raw.tasks || {});
+    for (const task of tasks) {
+      this.ledger.upsertTask(task);
+      this.ledger.appendEvent({
+        taskId: task.id,
+        type: 'MIGRATED_FROM_JSON',
+        message: 'Imported from legacy tasks.json',
+      });
+    }
+    const backup = `${legacyPath}.migrated-${Date.now()}`;
+    fs.renameSync(legacyPath, backup);
   }
 
   list() {
-    return this.store.readAll();
+    return this.ledger.listTasks();
   }
 
   get(taskId) {
-    return this.list().find((t) => t.id === taskId) || null;
+    return this.ledger.getTask(taskId);
+  }
+
+  findByClientRequestId(requestId) {
+    return this.ledger.findTaskByRequestId(requestId);
   }
 
   create(input) {
@@ -50,6 +50,7 @@ export class TaskStore {
       prompt: input.prompt,
       workspace: input.workspace || null,
       metadata: input.metadata || {},
+      clientRequestId: input.clientRequestId || null,
       executorId: null,
       attempts: [],
       result: null,
@@ -61,45 +62,73 @@ export class TaskStore {
       startedAt: null,
       finishedAt: null,
     };
-    const all = this.list();
-    all.push(task);
-    this.store.writeAll(all);
+    this.ledger.upsertTask(task);
+    this.ledger.appendEvent({
+      taskId: task.id,
+      type: 'TASK_CREATED',
+      message: 'Task accepted',
+      data: { status: TaskStatus.QUEUED },
+    });
     return task;
   }
 
   update(taskId, patch) {
-    const all = this.list();
-    const idx = all.findIndex((t) => t.id === taskId);
-    if (idx < 0) throw new Error(`Task not found: ${taskId}`);
+    const current = this.get(taskId);
+    if (!current) throw new Error(`Task not found: ${taskId}`);
     const updated = {
-      ...all[idx],
+      ...current,
       ...patch,
+      metadata: patch.metadata ? { ...current.metadata, ...patch.metadata } : current.metadata,
       updatedAt: new Date().toISOString(),
     };
-    all[idx] = updated;
-    this.store.writeAll(all);
+    this.ledger.upsertTask(updated);
     return updated;
   }
 
   listByStatus(status) {
-    return this.list().filter((t) => t.status === status);
+    return this.ledger.listTasks({ status });
+  }
+
+  listEvents(taskId) {
+    return this.ledger.listEvents(taskId);
   }
 
   requeueWaiting() {
     const now = new Date().toISOString();
-    const all = this.list();
-    let count = 0;
-    for (const task of all) {
-      if (task.status === TaskStatus.WAITING_EXECUTOR) {
-        task.status = TaskStatus.QUEUED;
-        task.waitingExecutorSince = null;
-        task.queuedAt = now;
-        task.updatedAt = now;
-        task.error = null;
-        count += 1;
-      }
+    const waiting = this.listByStatus(TaskStatus.WAITING_EXECUTOR);
+    for (const task of waiting) {
+      this.update(task.id, {
+        status: TaskStatus.QUEUED,
+        waitingExecutorSince: null,
+        queuedAt: now,
+        error: null,
+      });
+      this.ledger.appendEvent({
+        taskId: task.id,
+        type: 'TASK_REQUEUED',
+        message: 'Requeued from WAITING_EXECUTOR',
+      });
     }
-    this.store.writeAll(all);
-    return { requeued: count };
+    return { requeued: waiting.length };
+  }
+
+  syncProvider(provider) {
+    this.ledger.upsertProvider(provider);
+  }
+
+  listProviders() {
+    return this.ledger.listProviders();
+  }
+
+  recordRecovery(entry) {
+    this.ledger.appendRecoveryAudit(entry);
+  }
+
+  listRecovery({ limit = 50 } = {}) {
+    return this.ledger.listRecoveryAudit({ limit });
+  }
+
+  close() {
+    this.ledger.close();
   }
 }

@@ -32,6 +32,15 @@ async function handleRequest(runtime, req, res) {
     return sendJson(res, 200, await buildHealth(runtime));
   }
 
+  if (method === 'GET' && pathname === '/v1/capabilities') {
+    return sendJson(res, 200, { capabilities: runtime.providers.listCapabilities() });
+  }
+
+  if (method === 'GET' && pathname === '/v1/providers') {
+    await runtime.providers.syncFromExecutors();
+    return sendJson(res, 200, { providers: runtime.providers.listProviders() });
+  }
+
   if (method === 'GET' && pathname === '/v1/executors') {
     const health = await runtime.registry.healthCheckAll();
     return sendJson(res, 200, {
@@ -54,7 +63,8 @@ async function handleRequest(runtime, req, res) {
     if (!task) {
       return sendJson(res, 404, { error: { code: 'NOT_FOUND', message: 'Task not found' } });
     }
-    return sendJson(res, 200, { task });
+    const events = runtime.taskStore.listEvents(taskId);
+    return sendJson(res, 200, { task, events });
   }
 
   if (method === 'GET' && pathname === '/v1/tasks') {
@@ -85,11 +95,29 @@ async function handlePrompt(runtime, req, res) {
     });
   }
 
-  // CRITICAL: respond immediately with 202. Never wait for Cursor / executors.
+  const clientRequestId = body?.client?.request_id || body?.requestId || null;
+  if (clientRequestId) {
+    const existing = runtime.taskStore.findByClientRequestId(clientRequestId);
+    if (existing) {
+      return sendJson(res, 200, {
+        taskId: existing.id,
+        status: existing.status,
+        idempotent: true,
+      });
+    }
+  }
+
   const task = runtime.taskStore.create({
     prompt,
     workspace: body.workspace || body.cwd || null,
     metadata: body.metadata || {},
+    clientRequestId,
+  });
+
+  runtime.taskStore.ledger.appendEvent({
+    taskId: task.id,
+    type: 'TASK_QUEUED',
+    message: 'Task queued for async execution',
   });
 
   sendJson(res, 202, {
@@ -116,6 +144,12 @@ async function handleRecovery(runtime, req, res) {
   const params = { ...body };
   delete params.action;
   const result = await runtime.recovery.execute(action, params);
+  runtime.taskStore.recordRecovery({
+    action,
+    ok: true,
+    at: new Date().toISOString(),
+    result,
+  });
   sendJson(res, 200, {
     ok: true,
     action,
@@ -124,18 +158,30 @@ async function handleRecovery(runtime, req, res) {
 }
 
 async function buildHealth(runtime) {
-  const health = await runtime.registry.healthCheckAll();
+  const summary = await runtime.providers.getHealthSummary();
   const waiting = runtime.taskStore.listByStatus(TaskStatus.WAITING_EXECUTOR).length;
   const queued = runtime.taskStore.listByStatus(TaskStatus.QUEUED).length;
   const running = runtime.taskStore.listByStatus(TaskStatus.RUNNING).length;
-  const healthyExecutors = Object.values(health).filter((h) => h.ok).length;
+  const sovereignOk = true;
+  const intentOk = runtime.worker.isRunning();
+  const effectOk = summary.healthyCount > 0;
   return {
-    ok: healthyExecutors > 0 && runtime.worker.isRunning(),
+    ok: sovereignOk && intentOk,
+    sovereign_ok: sovereignOk,
+    intent_ok: intentOk,
+    effect_ok: effectOk,
     service: 'nexus-control-plane',
+    version: '0.3.1-phase-a-prime',
     workerRunning: runtime.worker.isRunning(),
     tasks: { queued, waitingExecutor: waiting, running },
-    executors: runtime.registry.snapshot(),
-    health,
+    executors: summary.executors,
+    health: summary.health,
+    providers: summary.providers,
+    capabilities: summary.capabilities,
+    recovery: {
+      allowedActions: runtime.recovery.allowedActions(),
+      recent: runtime.taskStore.listRecovery({ limit: 10 }),
+    },
     timestamp: new Date().toISOString(),
   };
 }
@@ -150,7 +196,7 @@ async function preflight(runtime) {
     cursorAgent: cursor || { ok: false },
     localShell: local || { ok: false },
     bootstrap: bootstrap || { ok: false },
-    failoverReady: Boolean((local?.ok || bootstrap?.ok)),
+    failoverReady: Boolean(local?.ok || bootstrap?.ok),
     note: cursor?.ok
       ? 'cursor-agent available'
       : 'cursor-agent unavailable; failover executors will be used',

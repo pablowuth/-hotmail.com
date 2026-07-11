@@ -2,8 +2,8 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Nexus Control Plane API",
-    "version": "2.0.0",
-    "description": "Async task control plane with executor failover and bootstrap recovery. POST /v1/prompt always returns HTTP 202 immediately."
+    "version": "2.1.0",
+    "description": "Async task control plane (Phase A') with skills-first provider registry, SQLite ledger, executor failover, and bootstrap recovery. POST /v1/prompt always returns HTTP 202 immediately."
   },
   "servers": [
     {
@@ -31,6 +31,24 @@
           "200": {
             "description": "Health snapshot"
           }
+        }
+      }
+    },
+    "/v1/capabilities": {
+      "get": {
+        "summary": "List canonical capabilities (skills-first contract)",
+        "operationId": "listCapabilities",
+        "responses": {
+          "200": { "description": "Capability catalog" }
+        }
+      }
+    },
+    "/v1/providers": {
+      "get": {
+        "summary": "List providers with health and capabilities",
+        "operationId": "listProviders",
+        "responses": {
+          "200": { "description": "Provider registry snapshot" }
         }
       }
     },
@@ -79,6 +97,19 @@
                   "metadata": {
                     "type": "object",
                     "additionalProperties": true
+                  },
+                  "client": {
+                    "type": "object",
+                    "properties": {
+                      "request_id": {
+                        "type": "string",
+                        "description": "Idempotency key for duplicate prompt submissions"
+                      }
+                    }
+                  },
+                  "requestId": {
+                    "type": "string",
+                    "description": "Alias for client.request_id"
                   }
                 }
               }

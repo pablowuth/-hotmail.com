@@ -1,6 +1,6 @@
 {
   "name": "nexus-control-plane",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Nexus execution control plane with async prompts, executor failover, and bootstrap recovery",
   "type": "module",
   "main": "src/index.js",

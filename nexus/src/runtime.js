@@ -1,16 +1,16 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { loadConfig } from './utils/config.js';
-import { resolveFromRoot } from './utils/paths.js';
+import { resolveFromRoot, expandWindowsEnv } from './utils/paths.js';
 import { TaskStore } from './store/task-store.js';
 import { ExecutorRegistry } from './executors/registry.js';
+import { ProviderRegistry } from './providers/provider-registry.js';
 import { CursorAgentExecutor } from './executors/cursor-agent.js';
 import { LocalShellExecutor } from './executors/local-shell.js';
 import { BootstrapExecutor } from './executors/bootstrap.js';
 import { TaskWorker } from './worker/task-worker.js';
 import { RecoveryService } from './recovery/recovery-service.js';
 import { createServer } from './server.js';
-import { expandWindowsEnv } from './utils/paths.js';
 
 export async function createRuntime(overrides = {}) {
   const config = loadConfig(overrides);
@@ -18,6 +18,7 @@ export async function createRuntime(overrides = {}) {
 
   const taskStore = new TaskStore(config.dataDir);
   const registry = new ExecutorRegistry();
+  const providers = new ProviderRegistry({ executorRegistry: registry, taskStore });
 
   const searchRoots = (config.cursorAgent?.windowsSearchRoots || []).map(expandWindowsEnv);
 
@@ -54,6 +55,7 @@ export async function createRuntime(overrides = {}) {
     config,
     taskStore,
     registry,
+    providers,
     worker,
     bootstrap: bootstrapExecutor,
     recovery: null,
@@ -65,12 +67,14 @@ export async function createRuntime(overrides = {}) {
   runtime.recovery = new RecoveryService({
     bootstrap: bootstrapExecutor,
     recoveryToken: config.recoveryToken,
+    taskStore,
   });
 
   const openapiPath = resolveFromRoot('openapi.json');
   runtime.openapi = JSON.parse(fs.readFileSync(openapiPath, 'utf8'));
 
-  // Recover any tasks stuck in WAITING_EXECUTOR from previous runs
+  await providers.syncFromExecutors();
+
   const recovered = taskStore.requeueWaiting();
   if (recovered.requeued > 0) {
     console.info(`[nexus] requeued ${recovered.requeued} WAITING_EXECUTOR task(s) on startup`);
@@ -103,4 +107,5 @@ export async function stopNexus(runtime) {
   if (!runtime) return;
   await runtime.worker.stop();
   await new Promise((resolve) => runtime.server.close(() => resolve()));
+  runtime.taskStore?.close?.();
 }
